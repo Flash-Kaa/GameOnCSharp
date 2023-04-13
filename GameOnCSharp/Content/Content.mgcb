@@ -20,12 +20,17 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/VlaShu.spritefont
 
-#begin Fonts/VlaShu.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
+#begin Sprites/ButtonPlay.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
 /processorParam:PremultiplyAlpha=True
-/processorParam:TextureFormat=Compressed
-/build:Fonts/VlaShu.spritefont
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Sprites/ButtonPlay.png
 
 #begin Sprites/ship/ship_behind_1.png
 /importer:TextureImporter

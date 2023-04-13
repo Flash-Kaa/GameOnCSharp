@@ -2,33 +2,43 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GameOnCSharp
 {
     public class Game1 : Game
     {
-        public static Texture2D WhiteMask;
+        public static GraphicsDeviceManager Graphics { get; private set; }
+        public static bool HaveStartedExecutingCommands = false;
+        public const int BrickSize = 10;
 
-        private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private Texture2D _textureSprite;
-        private Vector2 _positionSprite = Vector2.Zero;
+        public SpriteFont Font;
 
-        private SpriteFont _spriteFont;
-        private Lazy<TextBox> l_textBox;
-
+        private List<Lazy<IGameObject>> _components;
 
         public Game1()
         {
-            _graphics = new GraphicsDeviceManager(this);
+            Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
 
         protected override void Initialize()
         {
-            l_textBox = new Lazy<TextBox>(() => new TextBox(_spriteFont, _graphics));
+            var buttonPosition = new Point(
+                Game1.Graphics.PreferredBackBufferWidth * 7 / 10, 
+                Game1.Graphics.PreferredBackBufferHeight * 8 / 10);
+
+            _components = new List<Lazy<IGameObject>>
+            {
+                new Lazy<IGameObject>(() => new TextBox(Font)),
+                new Lazy<IGameObject>(() => new PlayerAnimal()),
+                new Lazy<IGameObject>(() => new Button(buttonPosition))
+            };
+
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             base.Initialize();
@@ -36,10 +46,9 @@ namespace GameOnCSharp
 
         protected override void LoadContent()
         {
-            WhiteMask = Content.Load<Texture2D>(@"Sprites\white_pixel");
+            Font = Content.Load<SpriteFont>(@"Fonts\VlaShu");
 
-            _textureSprite = Content.Load<Texture2D>(@"Sprites\ship\ship_front_1");
-            _spriteFont = Content.Load<SpriteFont>(@"Fonts\VlaShu");
+            _components.AsParallel().ForAll(x => x.Value.LoadContent(Content));
         }
 
         protected override void Update(GameTime gameTime)
@@ -50,10 +59,12 @@ namespace GameOnCSharp
                 Exit();
             #endregion
 
-            var mouseState = Mouse.GetState();
-            var keyboardState = Keyboard.GetState();
-            l_textBox.Value.Update(mouseState, keyboardState);
+            _components.ForEach(x => x.Value.Update(gameTime));
 
+            if(HaveStartedExecutingCommands)
+            {
+                Commands.SetCommands((_components[0].Value as TextBox).Text);
+            }
             base.Update(gameTime);
         }
 
@@ -63,9 +74,8 @@ namespace GameOnCSharp
 
             #region[drawing]
             _spriteBatch.Begin();
-            _spriteBatch.Draw(_textureSprite, _positionSprite, null, 
-                Color.White, 0, Vector2.Zero, 2f, SpriteEffects.None, 0);
-            l_textBox.Value.Draw(_spriteBatch);
+
+            _components.ForEach(x => x.Value.Draw(_spriteBatch));
 
             _spriteBatch.End();
             #endregion 

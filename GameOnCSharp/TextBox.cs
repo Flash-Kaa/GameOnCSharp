@@ -1,48 +1,62 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace GameOnCSharp
 {
-    public class TextBox
+    public class TextBox : IGameObject
     {
-        SpriteFont font;
-        Rectangle bounds;
-        Vector2 frame = new Vector2(20, 20);
+        public SpriteFont Font { get; set; }
+        public string Text { get; private set; } = "";
 
-        private string _text = "";
+        Rectangle bounds = new Rectangle();
+        Vector2 frame = new Vector2(20, 20);
+        Texture2D _whiteMask;
+
         private bool _isSelected = false;
         private bool _isKeyPressed = false;
         private Keys _lastKeyPressed;
 
-        private const double ShareInWidth = 0.7;
+        private const double ShareInWidth = 0.3;
         private const int Indent = 30;
 
         public TextBox(SpriteFont font, Rectangle bounds)
         {
             this.bounds = bounds;
-            this.font = font;
+            this.Font = font;
         }
 
-        public TextBox(SpriteFont font, GraphicsDeviceManager gdm)
+        public TextBox(SpriteFont font)
         {
-            var position = new Point((int)(gdm.PreferredBackBufferWidth * ShareInWidth), Indent);
+            this.Font = font;
+
+            var gdm = Game1.Graphics;
+
+            var position = new Point((int)(gdm.PreferredBackBufferWidth * (1 - ShareInWidth)), Indent);
             var size = new Point(
-                (int)(gdm.PreferredBackBufferWidth * (1 - ShareInWidth) - Indent), 
+                (int)(gdm.PreferredBackBufferWidth * ShareInWidth - Indent),
                 gdm.PreferredBackBufferHeight - Indent * 2);
 
             bounds = new Rectangle(position, size);
-            this.font = font;
         }
 
-        public void Update(MouseState mouseState, KeyboardState keyboardState)
+        public void LoadContent(ContentManager content)
         {
-            if (mouseState.LeftButton == ButtonState.Pressed)
+            _whiteMask = content.Load<Texture2D>(@"Sprites\white_pixel");
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            var mouseState = Mouse.GetState();
+            var keyboardState = Keyboard.GetState();
+
+            if (mouseState.LeftButton == ButtonState.Pressed && !Game1.HaveStartedExecutingCommands)
             {
                 _isSelected = bounds.Contains(mouseState.Position);
             }
 
-            if (_isSelected)
+            if (_isSelected && !Game1.HaveStartedExecutingCommands)
             {
                 if (keyboardState.GetPressedKeys().Length > 0)
                 {
@@ -52,32 +66,33 @@ namespace GameOnCSharp
 
                     if (keyPressed != _lastKeyPressed)
                     {
-                        if (keyPressed == Keys.Back && _text.Length > 0)
+                        if (keyPressed == Keys.Back && Text.Length > 0)
                         {
                             // Удаляем последний символ
-                            _text = _text.Substring(0, _text.Length - 1); 
+                            Text = Text.Substring(0, Text.Length - 1); 
                         }
 
                         else if (keyPressed == Keys.Space)
                         {
-                            _text += " ";
+                            Text += " ";
                         }
 
                         else if (keyPressed == Keys.Enter)
                         {
-                            _text += "\n";
+                            Text += "\n";
                         }
 
                         else if (!_isKeyPressed
                             && input.Length == 1)
                         {
-                            _text += input;
+                            Text += input;
                             _isKeyPressed = true;
                         }
 
                         _lastKeyPressed = keyPressed;
                     }
                 }
+
                 else
                 {
                     _isKeyPressed = false;
@@ -91,13 +106,11 @@ namespace GameOnCSharp
             var pos = bounds.Location.ToVector2() - frame;
             var scale = bounds.Size.ToVector2() + frame * 2;
 
-            spriteBatch.Draw(Game1.WhiteMask, pos, null, Color.White, 0f, 
+            spriteBatch.Draw(_whiteMask, pos, null, Color.White, 0f, 
                 Vector2.Zero, scale, SpriteEffects.None, 1f);
             
-            spriteBatch.DrawString(font, _text, bounds.Location.ToVector2(), 
-                _isSelected ? Color.Red : Color.Black);
+            spriteBatch.DrawString(Font, Text, bounds.Location.ToVector2(),
+                _isSelected && !Game1.HaveStartedExecutingCommands ? Color.Red : Color.Black);
         }
-
-        public string Text => _text;
     }
 }
