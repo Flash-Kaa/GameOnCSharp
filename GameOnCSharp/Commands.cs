@@ -10,64 +10,47 @@ namespace GameOnCSharp
 {
     public static class Commands
     {
-        static Vector2[] Directions;
+        public static Vector2[] Directions;
+        public static int CurrentIndex;
 
-        private static Vector2 _lastPlayerPosition;
-        private static double _doubleArea;
-        private static int _currentIndex;
+        private static string[] CommandsList 
+            = new string[]
+            {
+                "right",
+                "left",
+                "up",
+                "down"
+            };
 
         static void Initialize()
         {
-            _lastPlayerPosition = new Vector2(-1, -1);
-            _currentIndex = 0;
-            _doubleArea = 0.5;
-        }
-
-        public static Vector2 GetDirection(Vector2 playerPosition)
-        {
-            if(_lastPlayerPosition == new Vector2(-1, -1))
-                _lastPlayerPosition = playerPosition;
-
-            if (_currentIndex < Directions.Length && 
-                Math.Abs(playerPosition.X - _lastPlayerPosition.X) > (Directions[_currentIndex].X - _doubleArea) * Game1.BrickSize
-                && Math.Abs(playerPosition.Y - _lastPlayerPosition.Y) > (Directions[_currentIndex].Y - _doubleArea) * Game1.BrickSize
-                && Math.Abs(playerPosition.X - _lastPlayerPosition.X) < (Directions[_currentIndex].X + _doubleArea) * Game1.BrickSize
-                && Math.Abs(playerPosition.Y - _lastPlayerPosition.Y) < (Directions[_currentIndex].Y + _doubleArea) * Game1.BrickSize)
-            {
-                _currentIndex++;
-            }
-            if (_currentIndex >= Directions.Length)
-            {
-                Game1.HaveStartedExecutingCommands = false;
-                return new Vector2(-1, -1);
-            }
-            return Directions[_currentIndex];
+            CurrentIndex = -1;
         }
 
         public static void SetCommands(string text)
         {
             Initialize();
 
-            var t = text.Split(' ', '\n');
-            Directions = new Vector2[t.Length];
+            var commands = text.Split(' ', '\n').Where(x => CommandsList.Contains(x.ToLower()));
+            Directions = new Vector2[commands.Count()];
             var index = 0;
 
-            t.AsParallel().ForAll(
+            commands.AsParallel().ForAll(
                 k => 
                 {
                     switch (k.ToLower())
                     {
                         case "right":
-                            Directions[index++] = new Vector2(1, 0);
+                            Directions[index++] = new Vector2(Game1.BrickSize, 0);
                             break;
                         case "left":
-                            Directions[index++] = new Vector2(-1, 0);
+                            Directions[index++] = new Vector2(-Game1.BrickSize, 0);
                             break;
                         case "up":
-                            Directions[index++] = new Vector2(0, -1);
+                            Directions[index++] = new Vector2(0, -Game1.BrickSize);
                             break;
                         case "down":
-                            Directions[index++] = new Vector2(0, 1);
+                            Directions[index++] = new Vector2(0, Game1.BrickSize);
                             break;
                     }
                 });

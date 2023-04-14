@@ -11,12 +11,12 @@ namespace GameOnCSharp
     {
         public static GraphicsDeviceManager Graphics { get; private set; }
         public static bool HaveStartedExecutingCommands = false;
-        public const int BrickSize = 10;
+        public const int BrickSize = 50;
+        public SpriteFont Font;
 
         private SpriteBatch _spriteBatch;
 
-        public SpriteFont Font;
-
+        private bool _doFirstAfterPress = true;
         private List<Lazy<IGameObject>> _components;
 
         public Game1()
@@ -61,10 +61,14 @@ namespace GameOnCSharp
 
             _components.ForEach(x => x.Value.Update(gameTime));
 
-            if(HaveStartedExecutingCommands)
+            if(HaveStartedExecutingCommands && _doFirstAfterPress)
             {
                 Commands.SetCommands((_components[0].Value as TextBox).Text);
+                _doFirstAfterPress = false;
             }
+
+            if(!HaveStartedExecutingCommands)
+                _doFirstAfterPress = true;
             base.Update(gameTime);
         }
 

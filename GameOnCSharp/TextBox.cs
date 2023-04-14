@@ -106,6 +106,11 @@ namespace GameOnCSharp
             var pos = bounds.Location.ToVector2() - frame;
             var scale = bounds.Size.ToVector2() + frame * 2;
 
+            #region[draw brick]
+            /*spriteBatch.Draw(_whiteMask, new Vector2(0, 0), null, Color.White, 0f,
+                Vector2.Zero, new Vector2(Game1.BrickSize, Game1.BrickSize), SpriteEffects.None, 1f);*/
+            #endregion
+
             spriteBatch.Draw(_whiteMask, pos, null, Color.White, 0f, 
                 Vector2.Zero, scale, SpriteEffects.None, 1f);
             
