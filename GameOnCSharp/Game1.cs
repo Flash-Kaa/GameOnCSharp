@@ -11,7 +11,7 @@ namespace GameOnCSharp
     {
         public static GraphicsDeviceManager Graphics { get; private set; }
         public static bool HaveStartedExecutingCommands = false;
-        public const int BrickSize = 50;
+        public const float BrickSize = 50;
         public SpriteFont Font;
 
         private SpriteBatch _spriteBatch;
@@ -35,7 +35,7 @@ namespace GameOnCSharp
             _components = new List<Lazy<IGameObject>>
             {
                 new Lazy<IGameObject>(() => new TextBox(Font)),
-                new Lazy<IGameObject>(() => new PlayerAnimal()),
+                new Lazy<IGameObject>(() => new Maze()),
                 new Lazy<IGameObject>(() => new Button(buttonPosition))
             };
 
