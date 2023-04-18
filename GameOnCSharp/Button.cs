@@ -2,31 +2,38 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace GameOnCSharp
 {
     public class Button : IGameObject
     {
         Texture2D _texture;
-        Point _buttonPosition;
+        Rectangle _buttonCollider;
+        Action<bool> _onClick;
 
         private bool _isPressed;
         private Color _color;
         private double _pressedTime = -1;
         private double _maxSecondDelay = 0.3;
 
-        public Button(Point buttonPosition)
+        public Button(Texture2D sprite, Rectangle buttonCollider, Action<bool> onClick)
         {
-            _buttonPosition = buttonPosition;
+            _texture = sprite;
+            _buttonCollider = buttonCollider;
+            _onClick = onClick;
+
             _color = Color.White;
         }
 
+        public void LoadContent(ContentManager content) { }
+
         public bool EnterButton()
         {
-            return Mouse.GetState().X >= _buttonPosition.X &&
-                    Mouse.GetState().Y >= _buttonPosition.Y &&
-                    Mouse.GetState().X <= _buttonPosition.X + _texture.Width &&
-                    Mouse.GetState().Y <= _buttonPosition.Y + _texture.Height;
+            return Mouse.GetState().X >= _buttonCollider.Location.X 
+                && Mouse.GetState().Y >= _buttonCollider.Location.Y 
+                && Mouse.GetState().X <= _buttonCollider.Location.X + _buttonCollider.Width 
+                && Mouse.GetState().Y <= _buttonCollider.Location.Y + _buttonCollider.Height;
         }
 
         public void Update(GameTime gameTime)
@@ -38,7 +45,8 @@ namespace GameOnCSharp
                 _color = Color.Gray;
                 _pressedTime = gameTime.TotalGameTime.TotalSeconds;
 
-                Game1.HaveStartedExecutingCommands = true;
+                // Совершаем заданное действие
+                _onClick(true);
             }
 
             if(gameTime.TotalGameTime.TotalSeconds - _pressedTime >= _maxSecondDelay)
@@ -50,12 +58,7 @@ namespace GameOnCSharp
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(_texture, new Rectangle(_buttonPosition, new Point(_texture.Width, _texture.Height)), _color);
-        }
-
-        public void LoadContent(ContentManager content)
-        {
-            _texture = content.Load<Texture2D>(@"Sprites/ButtonPlay");
+            spriteBatch.Draw(_texture, _buttonCollider, _color);
         }
     }
 }

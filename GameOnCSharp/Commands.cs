@@ -1,13 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace GameOnCSharp
 {
     public static class Commands
     {
-        public static Vector2[] Directions;
-        public static int CurrentIndex;
+        private static List<Vector2> _directions;
+        private static int _currentIndex;
 
         private static string[] CommandsList 
             = new string[]
@@ -20,32 +21,46 @@ namespace GameOnCSharp
 
         static void Initialize()
         {
-            CurrentIndex = -1;
+            _currentIndex = -1;
         }
 
         public static void SetCommands(string text)
         {
             Initialize();
 
-            var commands = text.Split(' ', '\n').Where(x => CommandsList.Contains(x.ToLower()));
-            Directions = new Vector2[commands.Count()];
+            var commands = text.Split(' ', '\n').Where(x => CommandsList.Contains(x.ToLower()) || x.ToLower().Contains('x'));
+            _directions = new List<Vector2>(commands.Count());
 
-            var index = 0;
             foreach (var command in commands)
             {
-                switch (command.ToLower())
+                var lowCommand = command.ToLower();
+                switch (lowCommand)
                 {
                     case "right":
-                        Directions[index++] = new Vector2(Game1.BrickSize, 0);
+                        _directions.Add(new Vector2(Game1.BrickSize, 0));
                         break;
                     case "left":
-                        Directions[index++] = new Vector2(-Game1.BrickSize, 0);
+                        _directions.Add(new Vector2(-Game1.BrickSize, 0));
                         break;
                     case "up":
-                        Directions[index++] = new Vector2(0, -Game1.BrickSize);
+                        _directions.Add(new Vector2(0, -Game1.BrickSize));
                         break;
                     case "down":
-                        Directions[index++] = new Vector2(0, Game1.BrickSize);
+                        _directions.Add(new Vector2(0, Game1.BrickSize));
+                        break;
+                    default:
+                        var repeatCount = 0;
+                        if (_directions.Count > 0
+                            && lowCommand.Length >= 2
+                            && lowCommand[0] == 'x'
+                            && lowCommand.Skip(1).All(x => char.IsDigit(x))
+                            && int.TryParse(lowCommand.Substring(1), out repeatCount));
+                        {
+                            while (--repeatCount > 0)
+                            {
+                                _directions.Add(_directions.Last());
+                            }
+                        }
                         break;
                 }
             }
@@ -63,10 +78,10 @@ namespace GameOnCSharp
 
             if (player.Position == maze.Start.ToVector2() || _target == player.Position)
             {
-                Commands.CurrentIndex++;
+                _currentIndex++;
 
                 // Завершаем игру, если использовали все команды
-                if (Commands.CurrentIndex >= Commands.Directions.Length)
+                if (_currentIndex >= _directions.Count)
                 {
                     if(lastTimeInSeconds > TimeToStartGameAgain)
                         StartOver(gameTime, player, maze, lastTimeInSeconds);
@@ -75,10 +90,10 @@ namespace GameOnCSharp
                 }
 
                 // Устанавливаем следующую точку
-                _target = player.Position + Commands.Directions[Commands.CurrentIndex];
+                _target = player.Position + _directions[_currentIndex];
             }
 
-            var direction = Commands.Directions[Commands.CurrentIndex];
+            var direction = _directions[_currentIndex];
 
             // Изменение направления текущего спрайта
             player.CurrentSprite = player.DictSprites[direction];

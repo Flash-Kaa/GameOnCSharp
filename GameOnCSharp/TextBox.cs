@@ -7,38 +7,22 @@ namespace GameOnCSharp
 {
     public class TextBox : IGameObject
     {
-        public SpriteFont Font { get; set; }
         public string Text { get; private set; } = "";
 
-        Rectangle bounds = new Rectangle();
-        Vector2 frame = new Vector2(20, 20);
+        Vector2 _frame = new Vector2(20, 20);
         Texture2D _whiteMask;
 
         private bool _isSelected = false;
         private bool _isKeyPressed = false;
         private Keys _lastKeyPressed;
 
-        private const double ShareInWidth = 0.3;
-        private const int Indent = 30;
+        private SpriteFont _font;
+        private Rectangle _bounds;
 
         public TextBox(SpriteFont font, Rectangle bounds)
         {
-            this.bounds = bounds;
-            this.Font = font;
-        }
-
-        public TextBox(SpriteFont font)
-        {
-            this.Font = font;
-
-            var gdm = Game1.Graphics;
-
-            var position = new Point((int)(gdm.PreferredBackBufferWidth * (1 - ShareInWidth)), Indent);
-            var size = new Point(
-                (int)(gdm.PreferredBackBufferWidth * ShareInWidth - Indent),
-                gdm.PreferredBackBufferHeight - Indent * 2);
-
-            bounds = new Rectangle(position, size);
+            _bounds = bounds;
+            _font = font;
         }
 
         public void LoadContent(ContentManager content)
@@ -53,7 +37,7 @@ namespace GameOnCSharp
 
             if (mouseState.LeftButton == ButtonState.Pressed && !Game1.HaveStartedExecutingCommands)
             {
-                _isSelected = bounds.Contains(mouseState.Position);
+                _isSelected = _bounds.Contains(mouseState.Position);
             }
 
             if (_isSelected && !Game1.HaveStartedExecutingCommands)
@@ -62,7 +46,7 @@ namespace GameOnCSharp
                 {
                     // получаем код последней нажатой клавиши
                     Keys keyPressed = keyboardState.GetPressedKeys()[0];
-                    var input = keyPressed.ToString();
+                    var input = (char)keyPressed;
 
                     if (keyPressed != _lastKeyPressed)
                     {
@@ -82,8 +66,8 @@ namespace GameOnCSharp
                             Text += "\n";
                         }
 
-                        else if (!_isKeyPressed
-                            && input.Length == 1)
+                        else if (!_isKeyPressed 
+                            && char.IsLetterOrDigit(input))
                         {
                             Text += input;
                             _isKeyPressed = true;
@@ -103,8 +87,8 @@ namespace GameOnCSharp
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            var pos = bounds.Location.ToVector2() - frame;
-            var scale = bounds.Size.ToVector2() + frame * 2;
+            var pos = _bounds.Location.ToVector2() - _frame;
+            var scale = _bounds.Size.ToVector2() + _frame * 2;
 
             #region[draw brick]
             /*spriteBatch.Draw(_whiteMask, new Vector2(0, 0), null, Color.White, 0f,
@@ -114,7 +98,7 @@ namespace GameOnCSharp
             spriteBatch.Draw(_whiteMask, pos, null, Color.White, 0f, 
                 Vector2.Zero, scale, SpriteEffects.None, 1f);
             
-            spriteBatch.DrawString(Font, Text, bounds.Location.ToVector2(),
+            spriteBatch.DrawString(_font, Text, _bounds.Location.ToVector2(),
                 _isSelected && !Game1.HaveStartedExecutingCommands ? Color.Red : Color.Black);
         }
     }

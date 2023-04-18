@@ -11,7 +11,7 @@ namespace GameOnCSharp
         public Vector2 Position { get; }
         public bool Touch { get; set; } = false;
 
-        private const double TimeToUpd = 2;
+        private const double TimeToUpd = 0.5;
         private double _touchTime = -1;
 
         Texture2D _open;

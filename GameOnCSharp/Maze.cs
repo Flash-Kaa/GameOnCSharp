@@ -18,11 +18,11 @@ namespace GameOnCSharp
         private List<Rectangle> walls;
         private PlayerAnimal _player;
 
-        private const double ShareInWidth = 0.7;
+        private const double ShareInWidth = 0.55;
 
         private Vector2 _size = new Vector2(
-            Game1.Graphics.PreferredBackBufferHeight - Game1.BrickSize,
-            (float)(Game1.Graphics.PreferredBackBufferWidth * ShareInWidth)); 
+            (float)(Game1.Graphics.PreferredBackBufferWidth * ShareInWidth),
+            Game1.Graphics.PreferredBackBufferHeight - Game1.BrickSize); 
 
         public bool CanLocatedHere(Point position)
         {
@@ -39,8 +39,6 @@ namespace GameOnCSharp
 
         public Maze()
         {
-            
-
             Start = new Point(0, 0);
             End = new Target(new Vector2(0, 150));
 
@@ -52,7 +50,6 @@ namespace GameOnCSharp
                 new Trap(new Vector2(250, 100))
             };
         }
-
 
         public void LoadContent(ContentManager content)
         {
