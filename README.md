@@ -1,2 +1,1 @@
-# GameOnCSharp
-miniGame whith using MonoGame
+# Юдин Егор АТ-21
