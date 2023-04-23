@@ -35,12 +35,12 @@ namespace GameOnCSharp
             var mouseState = Mouse.GetState();
             var keyboardState = Keyboard.GetState();
 
-            if (mouseState.LeftButton == ButtonState.Pressed && !Game1.HaveStartedExecutingCommands)
+            if (mouseState.LeftButton == ButtonState.Pressed && !PlayMode.HaveStartedExecutingCommands)
             {
                 _isSelected = _bounds.Contains(mouseState.Position);
             }
 
-            if (_isSelected && !Game1.HaveStartedExecutingCommands)
+            if (_isSelected && !PlayMode.HaveStartedExecutingCommands)
             {
                 if (keyboardState.GetPressedKeys().Length > 0)
                 {
@@ -99,7 +99,7 @@ namespace GameOnCSharp
                 Vector2.Zero, scale, SpriteEffects.None, 1f);
             
             spriteBatch.DrawString(_font, Text, _bounds.Location.ToVector2(),
-                _isSelected && !Game1.HaveStartedExecutingCommands ? Color.Red : Color.Black);
+                _isSelected && !PlayMode.HaveStartedExecutingCommands ? Color.Red : Color.Black);
         }
     }
 }

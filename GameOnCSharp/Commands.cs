@@ -37,16 +37,16 @@ namespace GameOnCSharp
                 switch (lowCommand)
                 {
                     case "right":
-                        _directions.Add(new Vector2(Game1.BrickSize, 0));
+                        _directions.Add(new Vector2(PlayMode.BlockSize, 0));
                         break;
                     case "left":
-                        _directions.Add(new Vector2(-Game1.BrickSize, 0));
+                        _directions.Add(new Vector2(-PlayMode.BlockSize, 0));
                         break;
                     case "up":
-                        _directions.Add(new Vector2(0, -Game1.BrickSize));
+                        _directions.Add(new Vector2(0, -PlayMode.BlockSize));
                         break;
                     case "down":
-                        _directions.Add(new Vector2(0, Game1.BrickSize));
+                        _directions.Add(new Vector2(0, PlayMode.BlockSize));
                         break;
                     default:
                         var repeatCount = 0;
@@ -115,7 +115,7 @@ namespace GameOnCSharp
         // Начать с начала
         public static void StartOver(GameTime gameTime, PlayerAnimal player, Maze maze, double lastTimeInSeconds)
         {
-            Game1.HaveStartedExecutingCommands = false;
+            PlayMode.HaveStartedExecutingCommands = false;
             player.StartFromBeginning();
         }
     }

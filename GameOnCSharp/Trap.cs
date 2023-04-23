@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SharpDX.Direct2D1.Effects;
 using System;
 
 namespace GameOnCSharp
@@ -27,8 +26,8 @@ namespace GameOnCSharp
 
             _scale = new Lazy<Vector2>(
                () => new Vector2(
-                   Game1.BrickSize / _currentSprite.Height,
-                   Game1.BrickSize / _currentSprite.Width));
+                   PlayMode.BlockSize / _currentSprite.Height,
+                   PlayMode.BlockSize / _currentSprite.Width));
         }
 
         public void LoadContent(ContentManager content)

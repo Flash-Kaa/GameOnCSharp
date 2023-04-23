@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,7 +21,7 @@ namespace GameOnCSharp
 
         private Vector2 _size = new Vector2(
             (float)(Game1.Graphics.PreferredBackBufferWidth * ShareInWidth),
-            Game1.Graphics.PreferredBackBufferHeight - Game1.BrickSize); 
+            Game1.Graphics.PreferredBackBufferHeight - PlayMode.BlockSize); 
 
         public bool CanLocatedHere(Point position)
         {
@@ -39,6 +38,7 @@ namespace GameOnCSharp
 
         public Maze()
         {
+            // Сделать зависимость от размера PlayModel.BlockSize
             Start = new Point(0, 0);
             End = new Target(new Vector2(0, 150));
 

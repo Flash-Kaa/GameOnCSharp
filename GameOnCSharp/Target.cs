@@ -22,8 +22,8 @@ namespace GameOnCSharp
 
             _scale = new Lazy<Vector2>(
                () => new Vector2(
-                   Game1.BrickSize / _grass[_currentIndex].Height,
-                   Game1.BrickSize / _grass[_currentIndex].Width));
+                   PlayMode.BlockSize / _grass[_currentIndex].Height,
+                   PlayMode.BlockSize / _grass[_currentIndex].Width));
         }
 
         private void ChangeSprite()
