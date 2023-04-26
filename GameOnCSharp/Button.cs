@@ -8,8 +8,9 @@ namespace GameOnCSharp
 {
     public class Button : IGameObject
     {
+        public Rectangle ButtonCollider { get; set; }
+
         Texture2D _texture;
-        Rectangle _buttonCollider;
         Action<bool> _onClick;
 
         private bool _isPressed;
@@ -20,7 +21,7 @@ namespace GameOnCSharp
         public Button(Texture2D sprite, Rectangle buttonCollider, Action<bool> onClick)
         {
             _texture = sprite;
-            _buttonCollider = buttonCollider;
+            ButtonCollider = buttonCollider;
             _onClick = onClick;
 
             _color = Color.White;
@@ -30,10 +31,10 @@ namespace GameOnCSharp
 
         public bool EnterButton()
         {
-            return Mouse.GetState().X >= _buttonCollider.Location.X 
-                && Mouse.GetState().Y >= _buttonCollider.Location.Y 
-                && Mouse.GetState().X <= _buttonCollider.Location.X + _buttonCollider.Width 
-                && Mouse.GetState().Y <= _buttonCollider.Location.Y + _buttonCollider.Height;
+            return Mouse.GetState().X >= ButtonCollider.Location.X 
+                && Mouse.GetState().Y >= ButtonCollider.Location.Y 
+                && Mouse.GetState().X <= ButtonCollider.Location.X + ButtonCollider.Width 
+                && Mouse.GetState().Y <= ButtonCollider.Location.Y + ButtonCollider.Height;
         }
 
         public void Update(GameTime gameTime)
@@ -58,7 +59,7 @@ namespace GameOnCSharp
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(_texture, _buttonCollider, _color);
+            spriteBatch.Draw(_texture, ButtonCollider, _color);
         }
     }
 }

@@ -26,14 +26,6 @@ namespace GameOnCSharp
                    PlayMode.BlockSize / _grass[_currentIndex].Width));
         }
 
-        private void ChangeSprite()
-        {
-            _currentIndex++;
-
-            if(_currentIndex == _grass.Length)
-                _currentIndex = 0;
-        }
-
         public void LoadContent(ContentManager content)
         {
             _grass = new Texture2D[]
@@ -56,6 +48,14 @@ namespace GameOnCSharp
         {
             spriteBatch.Draw(_grass[_currentIndex], Position, null, Color.White, 0f,
                 Vector2.Zero, _scale.Value, SpriteEffects.None, 1f);
+        }
+
+        private void ChangeSprite()
+        {
+            _currentIndex++;
+
+            if (_currentIndex == _grass.Length)
+                _currentIndex = 0;
         }
     }
 }

@@ -9,8 +9,8 @@ namespace GameOnCSharp
 {
     public class PlayMode : IGameMode
     {
-        public static bool HaveStartedExecutingCommands = false;
-        public readonly static float BlockSize;
+        public static bool HaveStartedExecutingCommands { get; set; }  = false;
+        public static float BlockSize { get; private set; }
 
         private SpriteBatch _spriteBatch;
 
@@ -26,14 +26,49 @@ namespace GameOnCSharp
         public PlayMode(SpriteBatch spriteBatch)
         {
             _spriteBatch = spriteBatch;
-        }
-
-        static PlayMode()
-        {
             BlockSize = (int)(Game1.Graphics.PreferredBackBufferHeight / 20);
         }
 
-        public void Initialize()
+        public void LoadContent(ContentManager content)
+        {
+            UpdateLocationAndSize();
+
+            _font = content.Load<SpriteFont>(@"Fonts/VlaShu");
+            _buttonSpriteForTextbox = content.Load<Texture2D>(@"Sprites/MyPixelButton");
+
+            _components.AsParallel().ForAll(x => x.Value.LoadContent(content));
+
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            #region[EndGame]
+            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
+            //    || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            //    Exit();
+            #endregion
+
+            _components.ForEach(x => x.Value.Update(gameTime));
+
+            if (HaveStartedExecutingCommands && _doFirstAfterPress)
+            {
+                Commands.SetCommands((_components[0].Value as TextBox).Text);
+                _doFirstAfterPress = false;
+            }
+
+            if (!HaveStartedExecutingCommands)
+                _doFirstAfterPress = true;
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            Game1.Graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
+
+
+            _components.ForEach(x => x.Value.Draw(_spriteBatch));
+        }
+
+        public void UpdateLocationAndSize()
         {
             var textboxCollider = new Rectangle(
                 location: new Point(
@@ -63,47 +98,9 @@ namespace GameOnCSharp
             {
                 new Lazy<IGameObject>(() => new TextBox(_font, textboxCollider)),
                 new Lazy<IGameObject>(() => new Maze()),
-                new Lazy<IGameObject>(() => new Button(_buttonSpriteForTextbox, buttonForTextboxCollider, 
+                new Lazy<IGameObject>(() => new Button(_buttonSpriteForTextbox, buttonForTextboxCollider,
                     i => HaveStartedExecutingCommands = i))
             };
         }
-
-        public void LoadContent(ContentManager content)
-        {
-            _font = content.Load<SpriteFont>(@"Fonts/VlaShu");
-            _buttonSpriteForTextbox = content.Load<Texture2D>(@"Sprites/MyPixelButton");
-
-            _components.AsParallel().ForAll(x => x.Value.LoadContent(content));
-        }
-
-        public void Update(GameTime gameTime)
-        {
-            #region[EndGame]
-            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
-            //    || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            //    Exit();
-            #endregion
-
-            _components.ForEach(x => x.Value.Update(gameTime));
-
-            if (HaveStartedExecutingCommands && _doFirstAfterPress)
-            {
-                Commands.SetCommands((_components[0].Value as TextBox).Text);
-                _doFirstAfterPress = false;
-            }
-
-            if (!HaveStartedExecutingCommands)
-                _doFirstAfterPress = true;
-        }
-
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            Game1.Graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
-
-
-            _components.ForEach(x => x.Value.Draw(_spriteBatch));
-
-        }
-
     }
 }

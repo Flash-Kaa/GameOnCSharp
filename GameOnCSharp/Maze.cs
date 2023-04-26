@@ -8,11 +8,11 @@ namespace GameOnCSharp
 {
     public class Maze : IGameObject
     {
-        public bool HaveWin = false;
+        public bool HaveWin { get; private set; } = false;
 
-        public Point Start;
-        public Target End;
-        public Trap[] Traps;
+        public Point Start { get; private set; }
+        public Target End { get; private set; }
+        public Trap[] Traps { get; private set; }
 
         private List<Rectangle> walls;
         private PlayerAnimal _player;
@@ -40,14 +40,14 @@ namespace GameOnCSharp
         {
             // Сделать зависимость от размера PlayModel.BlockSize
             Start = new Point(0, 0);
-            End = new Target(new Vector2(0, 150));
+            End = new Target(new Vector2(0, PlayMode.BlockSize * 3));
 
             _player = new PlayerAnimal(this);
 
             Traps = new Trap[]
             {
-                new Trap(new Vector2(100, 150)),
-                new Trap(new Vector2(250, 100))
+                new Trap(new Vector2(PlayMode.BlockSize * 2, PlayMode.BlockSize * 3)),
+                new Trap(new Vector2(PlayMode.BlockSize * 5, PlayMode.BlockSize * 3))
             };
         }
 
@@ -61,15 +61,15 @@ namespace GameOnCSharp
 
         public void Update(GameTime gameTime)
         {
-            foreach(var t in Traps)
+            foreach(var trap in Traps)
             {
-                if (t.Position == _player.Position)
+                if (trap.Position == _player.Position)
                 {
-                    t.Touch = true;
+                    trap.Touch = true;
                     Commands.StartOver(gameTime, _player, this, 0);
                 }
 
-                t.Update(gameTime);
+                trap.Update(gameTime);
             }
 
             if (End.Position == _player.Position)

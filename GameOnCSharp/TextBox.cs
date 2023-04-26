@@ -11,6 +11,7 @@ namespace GameOnCSharp
 
         Vector2 _frame = new Vector2(20, 20);
         Texture2D _whiteMask;
+        private Color _frameColor = Color.White;
 
         private bool _isSelected = false;
         private bool _isKeyPressed = false;
@@ -42,6 +43,8 @@ namespace GameOnCSharp
 
             if (_isSelected && !PlayMode.HaveStartedExecutingCommands)
             {
+                _frameColor = Color.LightYellow;
+
                 if (keyboardState.GetPressedKeys().Length > 0)
                 {
                     // получаем код последней нажатой клавиши
@@ -53,7 +56,7 @@ namespace GameOnCSharp
                         if (keyPressed == Keys.Back && Text.Length > 0)
                         {
                             // Удаляем последний символ
-                            Text = Text.Substring(0, Text.Length - 1); 
+                            Text = Text.Substring(0, Text.Length - 1);
                         }
 
                         else if (keyPressed == Keys.Space)
@@ -66,7 +69,7 @@ namespace GameOnCSharp
                             Text += "\n";
                         }
 
-                        else if (!_isKeyPressed 
+                        else if (!_isKeyPressed
                             && char.IsLetterOrDigit(input))
                         {
                             Text += input;
@@ -83,6 +86,10 @@ namespace GameOnCSharp
                     _lastKeyPressed = Keys.None;
                 }
             }
+            else
+            {
+                _frameColor = Color.White;
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -95,7 +102,7 @@ namespace GameOnCSharp
                 Vector2.Zero, new Vector2(Game1.BrickSize, Game1.BrickSize), SpriteEffects.None, 1f);*/
             #endregion
 
-            spriteBatch.Draw(_whiteMask, pos, null, Color.White, 0f, 
+            spriteBatch.Draw(_whiteMask, pos, null, _frameColor, 0f, 
                 Vector2.Zero, scale, SpriteEffects.None, 1f);
             
             spriteBatch.DrawString(_font, Text, _bounds.Location.ToVector2(),

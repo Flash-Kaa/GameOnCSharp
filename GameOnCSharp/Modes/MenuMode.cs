@@ -2,61 +2,143 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-using System;
 using System.Linq;
 
 namespace GameOnCSharp
 {
     public class MenuMode : IGameMode
     {
-        private List<Lazy<IGameObject>> _components;
+        private Button _startButton;
+        private List<Button> _screenResolutionButtons = new List<Button>();
 
         private Texture2D _startButtonTexture;
         private Texture2D _questionButtonTexture;
         private Texture2D[] _screenResolutionTextures;
-        private Texture2D _fullScreenButtonTexture;
+
+        private string _srTextureFileLocation = "Sprites/screen resolution/srbutton";
 
         public MenuMode()
         {
-            //Graphics.PreferredBackBufferHeight = 1080;
-            //Graphics.PreferredBackBufferWidth = 1920;
-            //Graphics.IsFullScreen = true;   
         }
 
-        public void Initialize()
+        public void UpdateLocationAndSize()
         {
-            var sizeStartButtonRect = new Point(
-                    Game1.Graphics.PreferredBackBufferWidth / 3,
-                    Game1.Graphics.PreferredBackBufferHeight / 5);
+            #region[Screen Resolution Buttons]
+            var srButtonsSize = new Point(
+                Game1.Graphics.PreferredBackBufferWidth / 5,
+                Game1.Graphics.PreferredBackBufferHeight / 10);
 
-            var startButtonRect = new Lazy<Rectangle>( () => new Rectangle(
-                location: new Point(
-                    Game1.Graphics.PreferredBackBufferWidth / 2 - sizeStartButtonRect.X / 2,
-                    Game1.Graphics.PreferredBackBufferHeight / 2 - sizeStartButtonRect.Y / 2),
-                size: sizeStartButtonRect));
+            var srIndent = Game1.Graphics.PreferredBackBufferHeight / 40;
 
-            _components = new List<Lazy<IGameObject>>()
+            var srLocation = new Point(
+                Game1.Graphics.PreferredBackBufferWidth / 20,
+                Game1.Graphics.PreferredBackBufferHeight / 2 - (srIndent + srButtonsSize.Y) * _screenResolutionTextures.Length / 2);
+
+            for (int i = 0; i < _screenResolutionButtons.Count; i++)
             {
-                new Lazy<IGameObject>( () => new Button(
-                    _startButtonTexture, startButtonRect.Value, _ => Game1.CurrentScene = Scene.Play))
-            };
+                var newLocation = srLocation;
+
+                _screenResolutionButtons[i].ButtonCollider = new Rectangle(newLocation, srButtonsSize);
+
+                srLocation.Y += srIndent + srButtonsSize.Y;
+            }
+            #endregion
+
+            #region[Start Button]
+            CreateStartButton();
+            #endregion
         }
 
         public void LoadContent(ContentManager content)
         {
             _startButtonTexture = content.Load<Texture2D>(@"Sprites/MyPixelButton");
-            _components.AsParallel().ForAll(x => x.Value.LoadContent(content));
+
+            _screenResolutionTextures = new[]
+            {
+                content.Load<Texture2D>(_srTextureFileLocation + "1280x720"),
+                content.Load<Texture2D>(_srTextureFileLocation + "1440x900"),
+                content.Load<Texture2D>(_srTextureFileLocation + "1600x900"),
+                content.Load<Texture2D>(_srTextureFileLocation + "1920x1080")
+            };
+
+            CreateStartButton();
+            CreateScreenResolutionUpdateButtons();
+
+            _startButton.LoadContent(content);
+            _screenResolutionButtons.ForEach(x => x.LoadContent(content));
         }
 
         public void Update(GameTime gameTime)
         {
-            _components.ForEach(x => x.Value.Update(gameTime));
+            _startButton.Update(gameTime);
+            _screenResolutionButtons.ForEach(x => x.Update(gameTime));
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             Game1.Graphics.GraphicsDevice.Clear(Color.DarkGreen);
-            _components.ForEach(x => x.Value.Draw(spriteBatch));
+
+            _startButton.Draw(spriteBatch);
+            _screenResolutionButtons.ForEach(x => x.Draw(spriteBatch));
         }
+
+        private void CreateStartButton()
+        {
+            var sizeStartButtonRect = new Point(
+                    Game1.Graphics.PreferredBackBufferWidth / 3,
+                    Game1.Graphics.PreferredBackBufferHeight / 5);
+
+            _startButton = new Button(
+                    _startButtonTexture,
+                    new Rectangle(
+                        location: new Point(
+                            Game1.Graphics.PreferredBackBufferWidth / 2 - sizeStartButtonRect.X / 2,
+                            Game1.Graphics.PreferredBackBufferHeight / 2 - sizeStartButtonRect.Y / 2),
+                        size: sizeStartButtonRect),
+                    _ => Game1.CurrentScene = Scene.Play);
+        }
+
+        private void CreateScreenResolutionUpdateButtons()
+        {
+            var buttonsSize = new Point(
+                Game1.Graphics.PreferredBackBufferWidth / 5,
+                Game1.Graphics.PreferredBackBufferHeight / 10);
+
+            var indent = Game1.Graphics.PreferredBackBufferHeight / 40;
+
+            var location = new Point(
+                Game1.Graphics.PreferredBackBufferWidth / 20,
+                Game1.Graphics.PreferredBackBufferHeight / 2 - (indent + buttonsSize.Y) * _screenResolutionTextures.Length / 2);
+
+            foreach(var srTetureButton in _screenResolutionTextures)
+            {
+                var screenResolution = srTetureButton.Name
+                    .Remove(0, _srTextureFileLocation.Length)
+                    .Split('x')
+                    .Select(x => int.Parse(x))
+                    .ToArray();
+
+                var newLocation = location;
+
+                _screenResolutionButtons.Add( new Button(
+                    srTetureButton,
+                    new Rectangle(newLocation, buttonsSize),
+                    _ =>
+                    {
+                        Game1.Graphics.IsFullScreen = false;
+                        Game1.Graphics.PreferredBackBufferWidth = screenResolution[0];
+                        Game1.Graphics.PreferredBackBufferHeight = screenResolution[1];
+                        Game1.Graphics.IsFullScreen = true;
+                        Game1.Graphics.ApplyChanges();
+
+                        Game1.Scenes.ToList().ForEach(x => x.Value.UpdateLocationAndSize());
+                    }
+                    ));
+
+                location.Y += indent + buttonsSize.Y;
+            }
+        }
+
+        
     }
 }

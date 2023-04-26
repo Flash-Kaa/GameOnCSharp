@@ -8,10 +8,10 @@ namespace GameOnCSharp
     {
         void LoadContent(ContentManager content);
 
-        void Initialize();
-
         void Update(GameTime gameTime);
 
         void Draw(SpriteBatch spriteBatch);
+
+        void UpdateLocationAndSize();
     }
 }

@@ -12,11 +12,6 @@ namespace GameOnCSharp
         //private Texture2D _sharpHelpButtonTexture;
         //private Texture2D _javaHelpButtonTexture;
 
-        public void Initialize()
-        {
-            throw new System.NotImplementedException();
-        }
-
         public void LoadContent(ContentManager content)
         {
             throw new System.NotImplementedException();
@@ -28,6 +23,11 @@ namespace GameOnCSharp
         }
 
         public void Draw(SpriteBatch spriteBatch)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void UpdateLocationAndSize()
         {
             throw new System.NotImplementedException();
         }

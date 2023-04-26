@@ -52,7 +52,6 @@ namespace GameOnCSharp
                 _touchTime = -1;
                 Touch = false;
             }
-
         }
 
         public void Draw(SpriteBatch spriteBatch)

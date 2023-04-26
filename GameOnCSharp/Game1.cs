@@ -9,12 +9,13 @@ namespace GameOnCSharp
 {
     public class Game1 : Game
     {
+        public static Dictionary<Scene, IGameMode> Scenes { get; private set; }
         public static GraphicsDeviceManager Graphics { get; private set; }
-        public static bool HaveQuestions = false;
 
-        public static Scene CurrentScene = Scene.Menu;
-        private Dictionary<Scene, Lazy<IGameMode>> _scenes;
+        public static Scene CurrentScene { get; set; } = Scene.Menu;
+        public static bool HaveQuestions { get;  set; } = false;
 
+        private Scene _previous = Scene.Menu;
         private SpriteBatch _spriteBatch;
 
         public Game1()
@@ -28,20 +29,17 @@ namespace GameOnCSharp
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            _scenes = new Dictionary<Scene,Lazy<IGameMode>>
+            Scenes = new Dictionary<Scene, IGameMode>
             {
-                { Scene.Play, new Lazy<IGameMode>(() => new PlayMode(_spriteBatch)) },
-                { Scene.Menu, new Lazy<IGameMode>(() => new MenuMode()) },
+                { Scene.Menu, new MenuMode() }
             };
-
-            _scenes.AsParallel().ForAll(x => x.Value.Value.Initialize());
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            _scenes.AsParallel().ForAll(x => x.Value.Value.LoadContent(Content));
+            Scenes[CurrentScene].LoadContent(Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -52,7 +50,17 @@ namespace GameOnCSharp
                 Exit();
             #endregion
 
-            _scenes[CurrentScene].Value.Update(gameTime);
+            if (CurrentScene != _previous)
+            {
+                if (CurrentScene == Scene.Play)
+                    Scenes[CurrentScene] = new PlayMode(_spriteBatch);
+                else;
+
+                _previous = CurrentScene;
+                Scenes[CurrentScene].LoadContent(Content);
+            }
+
+            Scenes[CurrentScene].Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -62,7 +70,11 @@ namespace GameOnCSharp
 
             #region[drawing]
             _spriteBatch.Begin();
-            _scenes[CurrentScene].Value.Draw(_spriteBatch);
+            try
+            {
+                Scenes[CurrentScene].Draw(_spriteBatch);
+            }
+            catch { }
             _spriteBatch.End();
             #endregion 
 
