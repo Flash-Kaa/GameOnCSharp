@@ -76,7 +76,8 @@ namespace GameOnCSharp
         {
             var timeAfterDie = gameTime.TotalGameTime.TotalSeconds - _lastDieTimeInSecond;
 
-            if (player.Position == maze.Start.ToVector2() || _target == player.Position)
+            if (player.Position == new Vector2(maze.Start.X * PlayMode.BlockSize, maze.Start.Y * PlayMode.BlockSize) 
+                || _target == player.Position)
             {
                 _currentIndex++;
 
