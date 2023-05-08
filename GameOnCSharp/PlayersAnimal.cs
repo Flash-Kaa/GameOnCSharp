@@ -32,7 +32,6 @@ namespace GameOnCSharp
 
         public const double Speed = 3;
 
-
         public void StartFromBeginning()
         {
             _position = _maze.Start.ToVector2();
@@ -58,7 +57,6 @@ namespace GameOnCSharp
                () => new Vector2(
                    PlayMode.BlockSize / _currentSprite.Height,
                    PlayMode.BlockSize / _currentSprite.Width));
-
         }
 
         public void LoadContent(ContentManager content)
@@ -66,20 +64,20 @@ namespace GameOnCSharp
             _currentSprite = content.Load<Texture2D>(@"Sprites\ship\ship_down");
             DictSprites = new Dictionary<Vector2, Texture2D>()
             {
-                { new Vector2(0, 0), content.Load<Texture2D>(@"Sprites\ship\ship_down") },
-                { new Vector2(0, PlayMode.BlockSize), content.Load<Texture2D>(@"Sprites\ship\ship_down") },
-                { new Vector2(PlayMode.BlockSize, 0), content.Load<Texture2D>(@"Sprites\ship\ship_right") },
-                { new Vector2(0, -PlayMode.BlockSize), content.Load<Texture2D>(@"Sprites\ship\ship_up") },
-                { new Vector2(-PlayMode.BlockSize, 0), content.Load<Texture2D>(@"Sprites\ship\ship_left") }
+                [new Vector2(0, 0)] = content.Load<Texture2D>(@"Sprites\ship\ship_down"),
+
+                [new Vector2(0, PlayMode.BlockSize)] = content.Load<Texture2D>(@"Sprites\ship\ship_down"),
+                [new Vector2(PlayMode.BlockSize, 0)] = content.Load<Texture2D>(@"Sprites\ship\ship_right"),
+                [new Vector2(0, -PlayMode.BlockSize)] = content.Load<Texture2D>(@"Sprites\ship\ship_up"),
+                [new Vector2(-PlayMode.BlockSize, 0)] = content.Load<Texture2D>(@"Sprites\ship\ship_left")
             };
         }
 
         public void Update(GameTime gameTime)
         {
             if (PlayMode.HaveStartedExecutingCommands)
-            {
                 Commands.ShiftPlayer(gameTime, this, _maze, _lastTimeInSeconds);
-            }
+
             _lastTimeInSeconds = gameTime.TotalGameTime.TotalSeconds;
         }
 

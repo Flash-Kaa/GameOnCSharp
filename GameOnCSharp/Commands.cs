@@ -10,6 +10,9 @@ namespace GameOnCSharp
         private static List<Vector2> _directions;
         private static int _currentIndex;
 
+        private static Vector2 _target;
+        public const double TimeToStartGameAgain = 2;
+
         private static string[] CommandsList 
             = new string[]
             {
@@ -66,16 +69,8 @@ namespace GameOnCSharp
             }
         }
 
-
-
-        private static double _lastDieTimeInSecond = -1;
-        private static Vector2 _target;
-        public const double TimeToStartGameAgain = 2;
-
         public static void ShiftPlayer(GameTime gameTime, PlayerAnimal player, Maze maze, double lastTimeInSeconds)
         {
-            var timeAfterDie = gameTime.TotalGameTime.TotalSeconds - _lastDieTimeInSecond;
-
             if (player.Position == new Vector2(maze.Start.X * PlayMode.BlockSize, maze.Start.Y * PlayMode.BlockSize) 
                 || _target == player.Position)
             {

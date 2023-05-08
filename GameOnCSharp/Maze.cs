@@ -22,7 +22,7 @@ namespace GameOnCSharp
 
         private Vector2 _size = new Vector2(
             (float)(Game1.Graphics.PreferredBackBufferWidth * ShareInWidth),
-            Game1.Graphics.PreferredBackBufferHeight - PlayMode.BlockSize);
+            Game1.Graphics.PreferredBackBufferHeight);
 
         Texture2D texture;
         Lazy<Vector2> _scale;
@@ -31,12 +31,17 @@ namespace GameOnCSharp
         {
             var generatedMaze = new MazeGenerator(20, 20, 0.2, 0.1, 4);
 
-            Traps = generatedMaze.Traps.Select(location => new Trap(new Vector2(location.X *PlayMode.BlockSize, location.Y * PlayMode.BlockSize))).ToArray();
-            _walls = generatedMaze.Walls.Select(x => new Point((int)(x.X * PlayMode.BlockSize), (int)(x.Y * PlayMode.BlockSize))).ToList();
-            Start = new Point((int)(generatedMaze.Start.X * PlayMode.BlockSize), (int)(generatedMaze.Start.X * PlayMode.BlockSize));
+            Traps = generatedMaze.Traps
+                .Select(location => new Trap(new Vector2(location.X *PlayMode.BlockSize, location.Y * PlayMode.BlockSize)))
+                .ToArray();
+
+            _walls = generatedMaze.Walls
+                .Select(x => new Point((int)(x.X * PlayMode.BlockSize), (int)(x.Y * PlayMode.BlockSize)))
+                .ToList();
+
+            Start = new Point((int)(generatedMaze.Start.X * PlayMode.BlockSize), (int)(generatedMaze.Start.Y * PlayMode.BlockSize));
             End = new Target(new Vector2(generatedMaze.End.X * PlayMode.BlockSize, generatedMaze.End.Y * PlayMode.BlockSize));
             _player = new PlayerAnimal(this);
-
 
             _scale = new Lazy<Vector2>(
                () => new Vector2(

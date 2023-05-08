@@ -22,7 +22,6 @@ namespace GameOnCSharp
             _height = height;
             _width = width;
 
-            Maze = new MazeCell[_width, _height];
             Traps = new List<Point>();
             Walls = new List<Point>();
             Generate(chanceOfTrap, chanceOfWall, countPointToVisit);
@@ -34,17 +33,25 @@ namespace GameOnCSharp
 
         private void Generate(double chanceOfTrap, double chanceOfWall, int countPointToVisit)
         {
+            SetRightBorder();
             GenerateWallsAndWays();
             SetStartAndEnd();
             SetTrapsAndWallsWithIgnorPath(
                 CreatePath(countPointToVisit), chanceOfTrap, chanceOfWall);
         }
 
+        private void SetRightBorder()
+        {
+            Maze = new MazeCell[_width + 1, _height];
+            for (int i = 0; i < _height; i++)
+                Maze[_width, i] = MazeCell.Wall;
+        }
+
         private void AddObjectInList(MazeCell obj, List<Point> list)
         {
-            for (int i = 0; i < _height; i++)
+            for (int i = 0; i < Maze.GetLength(1); i++)
             {
-                for (int j = 0; j < _width; j++)
+                for (int j = 0; j < Maze.GetLength(0); j++)
                 {
                     if (Maze[j, i] == obj)
                         list.Add(new Point(j, i));
