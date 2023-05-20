@@ -9,15 +9,17 @@ namespace GameOnCSharp
     {
         public Vector2 Position { get; }
 
-        const double _timeToUpd = 1;
-
-        private double _lastUpdTime = 0;
+        private int _currentIndex;
         private Texture2D[] _grass;
-        private int _currentIndex = 0;
-        Lazy<Vector2> _scale;
+        private double _lastUpdTime;
+        private Lazy<Vector2> _scale;
+
+        private const double _timeToUpd = 4;
 
         public Target(Vector2 position)
         {
+            _lastUpdTime = 0;
+            _currentIndex = 0;
             Position = position;
 
             _scale = new Lazy<Vector2>(

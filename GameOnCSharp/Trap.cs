@@ -8,22 +8,22 @@ namespace GameOnCSharp
     public class Trap : IGameObject
     {
         public Vector2 Position { get; }
-        public bool Touch { get; set; } = false;
+        public bool Touch { get; set; }
+
+        private Texture2D _open;
+        private Texture2D _closed;
+        private double _touchTime;
+        private Lazy<Vector2> _scale;
+        private Texture2D _currentSprite;
 
         private const double TimeToUpd = 0.5;
-        private double _touchTime = -1;
-
-        Texture2D _open;
-        Texture2D _closed;
-
-        Texture2D _currentSprite;
-
-        Lazy<Vector2> _scale;
 
         public Trap(Vector2 position)
         {
             Position = position;
 
+            Touch = false;
+            _touchTime = -1;
             _scale = new Lazy<Vector2>(
                () => new Vector2(
                    PlayMode.BlockSize / _currentSprite.Height,
@@ -45,7 +45,6 @@ namespace GameOnCSharp
                 _currentSprite = _closed;
                 _touchTime = gameTime.TotalGameTime.TotalSeconds;
             }
-
             else if (Touch && gameTime.TotalGameTime.TotalSeconds - _touchTime >= TimeToUpd)
             {
                 _currentSprite = _open;

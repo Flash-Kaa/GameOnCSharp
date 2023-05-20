@@ -7,31 +7,21 @@ namespace GameOnCSharp
 {
     public static class Commands
     {
-        private static List<Vector2> _directions;
-        private static int _currentIndex;
+        private const double TimeToStartGameAgain = 2;
 
         private static Vector2 _target;
-        public const double TimeToStartGameAgain = 2;
-
-        private static string[] CommandsList 
-            = new string[]
-            {
-                "right",
-                "left",
-                "up",
-                "down"
-            };
-
-        static void Initialize()
-        {
-            _currentIndex = -1;
-        }
+        private static int _currentIndex;
+        private static string[] _commandList;
+        private static List<Vector2> _directions;
 
         public static void SetCommands(string text)
         {
             Initialize();
 
-            var commands = text.Split(' ', '\n').Where(x => CommandsList.Contains(x.ToLower()) || x.ToLower().Contains('x'));
+            var commands = text
+                .Split(' ', '\n')
+                .Where(x => _commandList.Contains(x.ToLower()) || x.ToLower().Contains('x'));
+
             _directions = new List<Vector2>(commands.Count());
 
             foreach (var command in commands)
@@ -71,7 +61,7 @@ namespace GameOnCSharp
 
         public static void ShiftPlayer(GameTime gameTime, PlayerAnimal player, Maze maze, double lastTimeInSeconds)
         {
-            if (player.Position == new Vector2(maze.Start.X * PlayMode.BlockSize, maze.Start.Y * PlayMode.BlockSize) 
+            if (_currentIndex == -1 || player.Position == new Vector2(maze.Start.X * PlayMode.BlockSize, maze.Start.Y * PlayMode.BlockSize) 
                 || _target == player.Position)
             {
                 _currentIndex++;
@@ -108,11 +98,22 @@ namespace GameOnCSharp
             }
         }
 
-        // Начать с начала
         public static void StartOver(GameTime gameTime, PlayerAnimal player, Maze maze, double lastTimeInSeconds)
         {
             PlayMode.HaveStartedExecutingCommands = false;
             player.StartFromBeginning();
+        }
+
+        private static void Initialize()
+        {
+            _currentIndex = -1;
+            _commandList = new string[]
+            {
+                "right",
+                "left",
+                "up",
+                "down"
+            };
         }
     }
 }

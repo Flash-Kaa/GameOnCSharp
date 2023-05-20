@@ -11,7 +11,7 @@ namespace GameOnCSharp
         public static GraphicsDeviceManager Graphics { get; private set; }
 
         public static Scene CurrentScene { get; set; } = Scene.Menu;
-        public static bool HaveQuestions { get;  set; } = false;
+        public static bool HaveQuestions { get; set; } = false;
 
         private Scene _previous = Scene.Menu;
         private SpriteBatch _spriteBatch;
@@ -28,9 +28,7 @@ namespace GameOnCSharp
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             Scenes = new Dictionary<Scene, IGameMode>
-            {
-                { Scene.Menu, new MenuMode() }
-            };
+            { [Scene.Menu] = new MenuMode() };
 
             base.Initialize();
         }
@@ -52,8 +50,7 @@ namespace GameOnCSharp
             {
                 if (CurrentScene == Scene.Play)
                     Scenes[CurrentScene] = new PlayMode(_spriteBatch);
-                else;
-
+                
                 _previous = CurrentScene;
                 Scenes[CurrentScene].LoadContent(Content);
             }
@@ -64,17 +61,12 @@ namespace GameOnCSharp
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            #region[drawing]
             _spriteBatch.Begin();
-            try
-            {
+
+            if(Scenes.ContainsKey(CurrentScene))
                 Scenes[CurrentScene].Draw(_spriteBatch);
-            }
-            catch { }
+
             _spriteBatch.End();
-            #endregion 
 
             base.Draw(gameTime);
         }
@@ -83,7 +75,6 @@ namespace GameOnCSharp
     public enum Scene
     { 
         Menu,
-        Play,
-        Help
+        Play
     }
 }

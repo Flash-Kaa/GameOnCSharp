@@ -12,7 +12,6 @@ namespace GameOnCSharp
         private List<Button> _screenResolutionButtons = new List<Button>();
 
         private Texture2D _startButtonTexture;
-        private Texture2D _questionButtonTexture;
         private Texture2D[] _screenResolutionTextures;
 
         private string _srTextureFileLocation = "Sprites/screen resolution/srbutton";

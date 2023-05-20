@@ -10,13 +10,13 @@ namespace GameOnCSharp
     {
         public Rectangle ButtonCollider { get; set; }
 
-        Texture2D _texture;
-        Action<bool> _onClick;
-
-        private bool _isPressed;
         private Color _color;
-        private double _pressedTime = -1;
-        private double _maxSecondDelay = 0.3;
+        private bool _isPressed;
+        private Texture2D _texture;
+        private Action<bool> _onClick;
+        private double _pressedTime;
+
+        private const double MaxSecondDelay = 0.3;
 
         public Button(Texture2D sprite, Rectangle buttonCollider, Action<bool> onClick)
         {
@@ -25,6 +25,7 @@ namespace GameOnCSharp
             _onClick = onClick;
 
             _color = Color.White;
+            _pressedTime = -1;
         }
 
         public void LoadContent(ContentManager content) { }
@@ -50,7 +51,7 @@ namespace GameOnCSharp
                 _onClick(true);
             }
 
-            if(gameTime.TotalGameTime.TotalSeconds - _pressedTime >= _maxSecondDelay)
+            if(gameTime.TotalGameTime.TotalSeconds - _pressedTime >= MaxSecondDelay)
             {
                 _isPressed = false;
                 _color = Color.White;

@@ -7,23 +7,27 @@ namespace GameOnCSharp
 {
     public class TextBox : IGameObject
     {
-        public string Text { get; private set; } = "";
+        public string Text { get; private set; }
 
-        Vector2 _frame = new Vector2(20, 20);
-        Texture2D _whiteMask;
-        private Color _frameColor = Color.White;
-
-        private bool _isSelected = false;
-        private bool _isKeyPressed = false;
-        private Keys _lastKeyPressed;
-
+        private Vector2 _frame;
+        private bool _isSelected;
         private SpriteFont _font;
+        private Color _frameColor;
         private Rectangle _bounds;
+        private bool _isKeyPressed;
+        private Keys _lastKeyPressed;
+        private Texture2D _whiteMask;
 
         public TextBox(SpriteFont font, Rectangle bounds)
         {
             _bounds = bounds;
             _font = font;
+
+            _isSelected = false;
+            _isKeyPressed = false;
+            _frameColor = Color.White;
+            _frame = new Vector2(20, 20);
+            Text = "";
         }
 
         public void LoadContent(ContentManager content)

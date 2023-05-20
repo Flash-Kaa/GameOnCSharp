@@ -8,27 +8,31 @@ namespace GameOnCSharp
     public class MazeGenerator
     {
         public MazeCell[,] Maze { get; private set; }
-        public Point Start { get; private set; } = new Point(-1, -1);
-        public Point End { get; private set; } = new Point(-1, -1);
+        public Point Start { get; private set; } 
+        public Point End { get; private set; }
 
-        public List<Point> Traps { get; private set; }
-        public List<Point> Walls { get; private set; }
+        public List<Vector2> Traps { get; private set; }
+        public List<Vector2> Walls { get; private set; }
 
         private int _height { get; }
         private int _width { get; }
 
         public MazeGenerator(int height, int width, double chanceOfTrap, double chanceOfWall, int countPointToVisit)
         {
-            _height = height;
-            _width = width;
+            End = new Point(-1, -1);
+            Start = new Point(-1, -1);
 
-            Traps = new List<Point>();
-            Walls = new List<Point>();
+            _width = width;
+            _height = height;
+
+            Traps = new List<Vector2>();
+            Walls = new List<Vector2>();
+
             Generate(chanceOfTrap, chanceOfWall, countPointToVisit);
 
-            AddObjectInList(MazeCell.Trap, Traps);
-            AddObjectInList(MazeCell.Null, Walls);
-            AddObjectInList(MazeCell.Wall, Walls);
+            AddObjectsInList(MazeCell.Trap, Traps);
+            AddObjectsInList(MazeCell.Null, Walls);
+            AddObjectsInList(MazeCell.Wall, Walls);
         }
 
         private void Generate(double chanceOfTrap, double chanceOfWall, int countPointToVisit)
@@ -47,14 +51,14 @@ namespace GameOnCSharp
                 Maze[_width, i] = MazeCell.Wall;
         }
 
-        private void AddObjectInList(MazeCell obj, List<Point> list)
+        private void AddObjectsInList(MazeCell obj, List<Vector2> list)
         {
             for (int i = 0; i < Maze.GetLength(1); i++)
             {
                 for (int j = 0; j < Maze.GetLength(0); j++)
                 {
                     if (Maze[j, i] == obj)
-                        list.Add(new Point(j, i));
+                        list.Add(new Vector2(j, i));
                 }
             }
         }

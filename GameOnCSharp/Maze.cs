@@ -9,49 +9,62 @@ namespace GameOnCSharp
 {
     public class Maze : IGameObject
     {
-        public bool HaveWin { get; private set; } = false;
-
-        public Point Start { get; private set; }
         public Target End { get; private set; }
+        public Vector2 Start { get; private set; }
+        public bool HaveWin { get; private set; }
         public Trap[] Traps { get; private set; }
 
-        private List<Point> _walls;
+        private Vector2 _size;
+        private SpriteFont _font;
+        private Texture2D _texture;
+        private List<Vector2> _walls;
         private PlayerAnimal _player;
+        private Lazy<Vector2> _scale;
 
         private const double ShareInWidth = 0.55;
 
-        private Vector2 _size = new Vector2(
-            (float)(Game1.Graphics.PreferredBackBufferWidth * ShareInWidth),
-            Game1.Graphics.PreferredBackBufferHeight);
-
-        Texture2D texture;
-        Lazy<Vector2> _scale;
-
         public Maze()
         {
-            var generatedMaze = new MazeGenerator(20, 20, 0.2, 0.1, 4);
+            var generatedMaze = new MazeGenerator(20, 20, 0.2, 0.2, 4);
 
             Traps = generatedMaze.Traps
-                .Select(location => new Trap(new Vector2(location.X *PlayMode.BlockSize, location.Y * PlayMode.BlockSize)))
+                .Select(location => new Trap(
+                    new Vector2(
+                        location.X *PlayMode.BlockSize, 
+                        location.Y * PlayMode.BlockSize)))
                 .ToArray();
 
             _walls = generatedMaze.Walls
-                .Select(x => new Point((int)(x.X * PlayMode.BlockSize), (int)(x.Y * PlayMode.BlockSize)))
+                .Select(x => new Vector2(
+                    (int)(x.X * PlayMode.BlockSize), 
+                    (int)(x.Y * PlayMode.BlockSize)))
                 .ToList();
 
-            Start = new Point((int)(generatedMaze.Start.X * PlayMode.BlockSize), (int)(generatedMaze.Start.Y * PlayMode.BlockSize));
-            End = new Target(new Vector2(generatedMaze.End.X * PlayMode.BlockSize, generatedMaze.End.Y * PlayMode.BlockSize));
-            _player = new PlayerAnimal(this);
+            Start = new Vector2(
+                (int)(generatedMaze.Start.X * PlayMode.BlockSize), 
+                (int)(generatedMaze.Start.Y * PlayMode.BlockSize));
 
-            _scale = new Lazy<Vector2>(
-               () => new Vector2(
-                   PlayMode.BlockSize / texture.Height,
-                   PlayMode.BlockSize / texture.Width));
+            End = new Target(
+                new Vector2(
+                    generatedMaze.End.X * PlayMode.BlockSize, 
+                    generatedMaze.End.Y * PlayMode.BlockSize));
+
+            _scale = new Lazy<Vector2>(() => new Vector2(
+                   PlayMode.BlockSize / _texture.Height,
+                   PlayMode.BlockSize / _texture.Width));
+
+            _size = new Vector2(
+                (float)(Game1.Graphics.PreferredBackBufferWidth * ShareInWidth),
+                Game1.Graphics.PreferredBackBufferHeight);
+
+            HaveWin = false;
+            _player = new PlayerAnimal(this);
         }
 
         public void LoadContent(ContentManager content)
         {
-            texture = content.Load<Texture2D>(@"Sprites\fence");
+            _font = content.Load<SpriteFont>(@"Fonts/VlaShu");
+            _texture = content.Load<Texture2D>(@"Sprites\fence");
 
             Traps.AsParallel().ForAll(t => t.LoadContent(content));
             End.LoadContent(content);
@@ -80,17 +93,21 @@ namespace GameOnCSharp
         
         public void Draw(SpriteBatch spriteBatch)
         {
-            //Traps.AsParallel().ForAll(t => t.Draw(spriteBatch));
-            //End.Draw(spriteBatch);
-            _player.Draw(spriteBatch);
-
-            _walls.ForEach(x => spriteBatch.Draw(texture, x.ToVector2(), null, Color.White, 0f,
+            _walls.ForEach(x => spriteBatch.Draw(_texture, x, null, Color.White, 0f,
                 Vector2.Zero, _scale.Value, SpriteEffects.None, 1f));
 
             foreach (var trap in Traps)
                 trap.Draw(spriteBatch);
 
             End.Draw(spriteBatch);
+            _player.Draw(spriteBatch);
+
+            if (HaveWin)
+            {
+                spriteBatch.DrawString(_font, "You WIN!!!", 
+                    new Vector2(100, Game1.Graphics.PreferredBackBufferHeight / 3), Color.Black, 
+                    0f, Vector2.Zero, PlayMode.BlockSize / 8, SpriteEffects.None, 0f);
+            }
         }
 
         public bool CanLocatedHere(Point position)
@@ -101,9 +118,9 @@ namespace GameOnCSharp
                 && position.Y <= _size.Y
                 && position.Y >= 0;
 
-            var collideWithWall = _walls.Any(x => x == _player.Position.ToPoint());
-            // Добавить проверку на стены, 
-
+            var collideWithWall = _walls
+                .Any(x => x == _player.Position);
+            
             return inScreen && !collideWithWall;
         }
     }
