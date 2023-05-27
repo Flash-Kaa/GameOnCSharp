@@ -6,19 +6,14 @@ using System.Collections.Generic;
 
 namespace GameOnCSharp
 {
-    public class PlayerAnimal : IGameObject
+    public static class PlayerAnimal
     {
+        public static Dictionary<Vector2, Texture2D> DictSprites { get; private set; }
+
         public const double Speed = 3;
 
-        public Dictionary<Vector2, Texture2D> DictSprites { get; private set; }
-
-        private Maze _maze;
-        private Vector2 _position;
-        private Texture2D _currentSprite;
-        private Lazy<Vector2> _scaleTexture;
-        private double _lastUpdTimeInSeconds;
-
-        public Texture2D CurrentSprite
+        private static Texture2D _currentSprite;
+        public static Texture2D CurrentSprite
         {
             get => _currentSprite;
             set
@@ -30,40 +25,39 @@ namespace GameOnCSharp
             }
         }
 
-        public Vector2 Position 
+        private static Vector2 _position;
+        public static Vector2 Position 
         { 
             get => _position;
             set
             {
-                if(!_maze.CanLocatedHere(value.ToPoint()))
+                if(!Maze.CanLocatedHere(value.ToPoint()))
                     throw new IndexOutOfRangeException();
 
                 _position = value;
             }
         }
 
-        public PlayerAnimal(Maze maze)
-        {
-            _maze = maze;
-            _lastUpdTimeInSeconds = -1;
-            _position = _maze.Start;
+        private static Vector2 _scaleTexture;
+        private static double _lastUpdTimeInSeconds;
 
-            _scaleTexture = new Lazy<Vector2>(
-               () => new Vector2(
-                   PlayMode.BlockSize / _currentSprite.Height,
-                   PlayMode.BlockSize / _currentSprite.Width));
-        }
-
-        public void StartFromBeginning()
+        public static void StartFromBeginning()
         {
-            _position = _maze.Start;
+            _position = Maze.Start;
             _currentSprite = DictSprites[new Vector2(0, 0)];
         }
 
-        public void LoadContent(ContentManager content)
+        public static void LoadContent(ContentManager content)
         {
+            _lastUpdTimeInSeconds = -1;
+            _position = Maze.Start;
+
             _currentSprite = content.Load<Texture2D>(@"Sprites\ship\ship_down");
-            
+
+            _scaleTexture = new Vector2(
+                   PlayMode.BlockSize / _currentSprite.Height,
+                   PlayMode.BlockSize / _currentSprite.Width);
+
             DictSprites = new Dictionary<Vector2, Texture2D>()
             {
                 [new Vector2(0, 0)] = content.Load<Texture2D>(@"Sprites\ship\ship_down"),
@@ -75,18 +69,18 @@ namespace GameOnCSharp
             };
         }
 
-        public void Update(GameTime gameTime)
+        public static void Update(GameTime gameTime)
         {
             if (PlayMode.HaveStartedExecutingCommands)
-                Commands.ShiftPlayer(gameTime, this, _maze, _lastUpdTimeInSeconds);
+                Commands.ShiftPlayer(gameTime, _lastUpdTimeInSeconds);
 
             _lastUpdTimeInSeconds = gameTime.TotalGameTime.TotalSeconds;
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public static void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(_currentSprite, _position, null, Color.White, 0f,
-                    Vector2.Zero, _scaleTexture.Value, SpriteEffects.None, 1f);
+                    Vector2.Zero, _scaleTexture, SpriteEffects.None, 1f);
         }
     }
 }

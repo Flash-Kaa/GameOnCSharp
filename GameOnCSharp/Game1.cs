@@ -1,20 +1,20 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GameOnCSharp
 {
     public class Game1 : Game
     {
-        public static Dictionary<Scene, IGameMode> Scenes { get; private set; }
         public static GraphicsDeviceManager Graphics { get; private set; }
+        public static Scene CurrentScene { get; set; }
 
-        public static Scene CurrentScene { get; set; } = Scene.Menu;
-        public static bool HaveQuestions { get; set; } = false;
-
-        private Scene _previous = Scene.Menu;
+        private Dictionary<Scene, Type> _sceneClasses;
         private SpriteBatch _spriteBatch;
+        private Scene _previous;
 
         public Game1()
         {
@@ -27,15 +27,15 @@ namespace GameOnCSharp
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            Scenes = new Dictionary<Scene, IGameMode>
-            { [Scene.Menu] = new MenuMode() };
+            _previous = Scene.Null;
+            CurrentScene = Scene.Menu;
+            _sceneClasses = new Dictionary<Scene, Type>()
+            {
+                [Scene.Play] = typeof(PlayMode),
+                [Scene.Menu] = typeof(MenuMode)
+            };
 
             base.Initialize();
-        }
-
-        protected override void LoadContent()
-        {
-            Scenes[CurrentScene].LoadContent(Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -48,32 +48,35 @@ namespace GameOnCSharp
 
             if (CurrentScene != _previous)
             {
-                if (CurrentScene == Scene.Play)
-                    Scenes[CurrentScene] = new PlayMode(_spriteBatch);
-                
                 _previous = CurrentScene;
-                Scenes[CurrentScene].LoadContent(Content);
+                InvokeInCurrentScene("LoadContent", Content);
             }
 
-            Scenes[CurrentScene].Update(gameTime);
+            InvokeInCurrentScene("Update", gameTime);
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
+            if (CurrentScene != _previous)
+                return;
+
             _spriteBatch.Begin();
-
-            if(Scenes.ContainsKey(CurrentScene))
-                Scenes[CurrentScene].Draw(_spriteBatch);
-
+            InvokeInCurrentScene("Draw", _spriteBatch);
             _spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void InvokeInCurrentScene(string methodName, params object[] parameters)
+        {
+            _sceneClasses[CurrentScene].GetMethod(methodName)?.Invoke(null, parameters);
         }
     }
 
     public enum Scene
     { 
+        Null,
         Menu,
         Play
     }

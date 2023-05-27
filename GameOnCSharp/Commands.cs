@@ -43,26 +43,24 @@ namespace GameOnCSharp
                         break;
                     default:
                         var repeatCount = 0;
-                        if (_directions.Count > 0
-                            && lowCommand.Length >= 2
-                            && lowCommand[0] == 'x'
+                        if (_directions.Count > 0 && lowCommand.Length >= 2 && lowCommand[0] == 'x'
                             && lowCommand.Skip(1).All(x => char.IsDigit(x))
                             && int.TryParse(lowCommand.Substring(1), out repeatCount));
                         {
                             while (--repeatCount > 0)
-                            {
                                 _directions.Add(_directions.Last());
-                            }
                         }
                         break;
                 }
             }
         }
 
-        public static void ShiftPlayer(GameTime gameTime, PlayerAnimal player, Maze maze, double lastTimeInSeconds)
+        public static void ShiftPlayer(GameTime gameTime, double lastTimeInSeconds)
         {
-            if (_currentIndex == -1 || player.Position == new Vector2(maze.Start.X * PlayMode.BlockSize, maze.Start.Y * PlayMode.BlockSize) 
-                || _target == player.Position)
+            if (_currentIndex == -1 
+                || PlayerAnimal.Position == 
+                    new Vector2(Maze.Start.X * PlayMode.BlockSize, Maze.Start.Y * PlayMode.BlockSize) 
+                || _target == PlayerAnimal.Position)
             {
                 _currentIndex++;
 
@@ -70,38 +68,34 @@ namespace GameOnCSharp
                 if (_currentIndex >= _directions.Count)
                 {
                     if(lastTimeInSeconds > TimeToStartGameAgain)
-                        StartOver(gameTime, player, maze, lastTimeInSeconds);
+                        StartOver(gameTime, lastTimeInSeconds);
 
                     return;
                 }
 
-                // Устанавливаем следующую точку
-                _target = player.Position + _directions[_currentIndex];
+                _target = PlayerAnimal.Position + _directions[_currentIndex];
             }
 
             var direction = _directions[_currentIndex];
 
-            // Изменение направления текущего спрайта
-            player.CurrentSprite = player.DictSprites[direction];
+            PlayerAnimal.CurrentSprite = PlayerAnimal.DictSprites[direction];
 
-            // Направление и величина движения
-            var coef = (gameTime.TotalGameTime.TotalSeconds - lastTimeInSeconds) * PlayerAnimal.Speed;
-            var shift = new Vector2((float)(direction.X * coef), (float)(direction.Y * coef));
+            var shiftCoef = (gameTime.TotalGameTime.TotalSeconds - lastTimeInSeconds) * PlayerAnimal.Speed;
+            var shift = new Vector2((float)(direction.X * shiftCoef), (float)(direction.Y * shiftCoef));
 
-            // Принимаем во внимание, что мы можем перепрыгнуть цель
-            var lenToTarget = new Vector2(player.Position.X - _target.X, player.Position.Y - _target.Y).Length();
-            player.Position = lenToTarget >= shift.Length() ? player.Position + shift : _target;
+            var lenToTarget = new Vector2(PlayerAnimal.Position.X - _target.X, PlayerAnimal.Position.Y - _target.Y).Length();
+            PlayerAnimal.Position = lenToTarget >= shift.Length() ? PlayerAnimal.Position + shift : _target;
 
-            if (!maze.CanLocatedHere(player.Position.ToPoint()) && lastTimeInSeconds > TimeToStartGameAgain)
+            if (!Maze.CanLocatedHere(PlayerAnimal.Position.ToPoint()) && lastTimeInSeconds > TimeToStartGameAgain)
             {
-                StartOver(gameTime, player, maze, lastTimeInSeconds);
+                StartOver(gameTime, lastTimeInSeconds);
             }
         }
 
-        public static void StartOver(GameTime gameTime, PlayerAnimal player, Maze maze, double lastTimeInSeconds)
+        public static void StartOver(GameTime gameTime, double lastTimeInSeconds)
         {
             PlayMode.HaveStartedExecutingCommands = false;
-            player.StartFromBeginning();
+            PlayerAnimal.StartFromBeginning();
         }
 
         private static void Initialize()

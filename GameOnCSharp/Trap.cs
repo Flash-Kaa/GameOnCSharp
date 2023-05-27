@@ -8,54 +8,59 @@ namespace GameOnCSharp
     public class Trap : IGameObject
     {
         public Vector2 Position { get; }
-        public bool Touch { get; set; }
 
-        private Texture2D _open;
-        private Texture2D _closed;
+        private bool _touch;
         private double _touchTime;
         private Lazy<Vector2> _scale;
-        private Texture2D _currentSprite;
+        private Texture2D _openTexture;
+        private Texture2D _closedTexture;
+        private Texture2D _currentTexture;
 
         private const double TimeToUpd = 0.5;
 
         public Trap(Vector2 position)
         {
-            Position = position;
-
-            Touch = false;
+            _touch = false;
             _touchTime = -1;
+            Position = position;
             _scale = new Lazy<Vector2>(
                () => new Vector2(
-                   PlayMode.BlockSize / _currentSprite.Height,
-                   PlayMode.BlockSize / _currentSprite.Width));
+                   PlayMode.BlockSize / _currentTexture.Height,
+                   PlayMode.BlockSize / _currentTexture.Width));
         }
 
         public void LoadContent(ContentManager content)
         {
-            _open = content.Load<Texture2D>(@"Sprites\trap\openTrap");
-            _closed = content.Load<Texture2D>(@"Sprites\trap\closedTrap");
+            _openTexture = content.Load<Texture2D>(@"Sprites\trap\openTrap");
+            _closedTexture = content.Load<Texture2D>(@"Sprites\trap\closedTrap");
 
-            _currentSprite = _open;
+            _currentTexture = _openTexture;
         }   
 
         public void Update(GameTime gameTime)
         {
-            if (Touch && _touchTime == -1)
+            if (Position == PlayerAnimal.Position)
             {
-                _currentSprite = _closed;
+                _touch = true;
+                Commands.StartOver(gameTime, 0);
+            }
+
+            if (_touch && _touchTime == -1)
+            {
+                _currentTexture = _closedTexture;
                 _touchTime = gameTime.TotalGameTime.TotalSeconds;
             }
-            else if (Touch && gameTime.TotalGameTime.TotalSeconds - _touchTime >= TimeToUpd)
+            else if (_touch && gameTime.TotalGameTime.TotalSeconds - _touchTime >= TimeToUpd)
             {
-                _currentSprite = _open;
+                _currentTexture = _openTexture;
                 _touchTime = -1;
-                Touch = false;
+                _touch = false;
             }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(_currentSprite, Position, null, Color.White, 0f,
+            spriteBatch.Draw(_currentTexture, Position, null, Color.White, 0f,
                 Vector2.Zero, _scale.Value, SpriteEffects.None, 1f);
         }
     }

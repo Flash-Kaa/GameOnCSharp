@@ -10,15 +10,15 @@ namespace GameOnCSharp
     {
         public Rectangle ButtonCollider { get; set; }
 
+        private const double MaxSecondDelay = 0.3;
+
         private Color _color;
         private bool _isPressed;
         private Texture2D _texture;
-        private Action<bool> _onClick;
         private double _pressedTime;
+        private Action<object> _onClick;
 
-        private const double MaxSecondDelay = 0.3;
-
-        public Button(Texture2D sprite, Rectangle buttonCollider, Action<bool> onClick)
+        public Button(Texture2D sprite, Rectangle buttonCollider, Action<object> onClick)
         {
             _texture = sprite;
             ButtonCollider = buttonCollider;
@@ -40,15 +40,13 @@ namespace GameOnCSharp
 
         public void Update(GameTime gameTime)
         {
-            // Проверяем, находится ли курсор мыши над кнопкой
             if (EnterButton() && Mouse.GetState().LeftButton == ButtonState.Pressed && !_isPressed)
             {
                 _isPressed = true;
                 _color = Color.Gray;
                 _pressedTime = gameTime.TotalGameTime.TotalSeconds;
 
-                // Совершаем заданное действие
-                _onClick(true);
+                _onClick(null);
             }
 
             if(gameTime.TotalGameTime.TotalSeconds - _pressedTime >= MaxSecondDelay)

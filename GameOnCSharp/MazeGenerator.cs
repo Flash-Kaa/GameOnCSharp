@@ -7,9 +7,9 @@ namespace GameOnCSharp
 {
     public class MazeGenerator
     {
-        public MazeCell[,] Maze { get; private set; }
-        public Point Start { get; private set; } 
         public Point End { get; private set; }
+        public Point Start { get; private set; }
+        public MazeCell[,] Maze { get; private set; }
 
         public List<Vector2> Traps { get; private set; }
         public List<Vector2> Walls { get; private set; }
@@ -17,36 +17,43 @@ namespace GameOnCSharp
         private int _height { get; }
         private int _width { get; }
 
-        public MazeGenerator(int height, int width, double chanceOfTrap, double chanceOfWall, int countPointToVisit)
+        public MazeGenerator(int height, int width, 
+            double chanceOfTrap, double chanceOfWall, int countPointToVisit)
         {
-            End = new Point(-1, -1);
-            Start = new Point(-1, -1);
-
             _width = width;
             _height = height;
 
+            Generate(chanceOfTrap, chanceOfWall, countPointToVisit);
+        }
+
+        private void Generate(double chanceOfTrap, double chanceOfWall, int countPointToVisit)
+        {
             Traps = new List<Vector2>();
             Walls = new List<Vector2>();
 
-            Generate(chanceOfTrap, chanceOfWall, countPointToVisit);
+            SetRightBorder();
+            GenerateWallsAndWays();
+            SetStartAndEnd();
+
+            var path = CreatePath(countPointToVisit);
+
+            if (path.Count == 0)
+            {
+                Generate(chanceOfTrap, chanceOfWall, countPointToVisit);
+                return;
+            }
+
+            SetTrapsAndWallsWithIgnorPath(path, chanceOfTrap, chanceOfWall);
 
             AddObjectsInList(MazeCell.Trap, Traps);
             AddObjectsInList(MazeCell.Null, Walls);
             AddObjectsInList(MazeCell.Wall, Walls);
         }
 
-        private void Generate(double chanceOfTrap, double chanceOfWall, int countPointToVisit)
-        {
-            SetRightBorder();
-            GenerateWallsAndWays();
-            SetStartAndEnd();
-            SetTrapsAndWallsWithIgnorPath(
-                CreatePath(countPointToVisit), chanceOfTrap, chanceOfWall);
-        }
-
         private void SetRightBorder()
         {
             Maze = new MazeCell[_width + 1, _height];
+
             for (int i = 0; i < _height; i++)
                 Maze[_width, i] = MazeCell.Wall;
         }
@@ -91,21 +98,38 @@ namespace GameOnCSharp
                     toVisit.Add(randomPoint);
                     countPointToVisit--;
                 }
+                
+                var pathAStar = FindPath(Start, toVisit[0]);
 
-                path = FindPath(Start, toVisit[0]);
+                if (pathAStar.Count == 0)
+                    return new List<Point>();
+
+                path = pathAStar;
 
                 for (int i = 0; i < toVisit.Count - 1; i++)
-                    path.AddRange(FindPath(toVisit[i], toVisit[i + 1]));
+                {
+                    pathAStar = FindPath(toVisit[i], toVisit[i + 1]);
 
-                path.AddRange(FindPath(toVisit[toVisit.Count - 1], End));
+                    if (pathAStar.Count == 0)
+                        return new List<Point>();
+
+                    path.AddRange(pathAStar);
+                }
+
+                pathAStar = FindPath(toVisit[toVisit.Count - 1], End);
+
+                if (pathAStar.Count == 0)
+                    return new List<Point>();
+
+                path.AddRange(pathAStar);
             }
             else
             {
                 path = FindPath(Start, End);
-            }
 
-            if (path == null)
-                throw new Exception("Can't find path from start to end");
+                if(path.Count == 0)
+                    return new List<Point>();
+            }
 
             return path;
         }
@@ -153,10 +177,10 @@ namespace GameOnCSharp
             var direction = nearbyPoint - point;
 
             var nearbyPointsToNearbyPoint = new List<Point>
-        {
-            nearbyPoint + new Point(direction.Y, direction.X),
-            nearbyPoint - new Point(direction.Y, direction.X)
-        };
+            {
+                nearbyPoint + new Point(direction.Y, direction.X),
+                nearbyPoint - new Point(direction.Y, direction.X)
+            };
 
             foreach (var nearbyP in nearbyPointsToNearbyPoint)
             {
@@ -259,7 +283,7 @@ namespace GameOnCSharp
 
         private List<Point> ReconstructPath(Dictionary<Point, Point> cameFrom, Point current, Point start)
         {
-            List<Point> path = new List<Point>();
+            var path = new List<Point>();
 
             while (cameFrom.ContainsKey(current))
             {
@@ -279,9 +303,7 @@ namespace GameOnCSharp
             for (int i = 1; i < openList.Count; i++)
             {
                 if (fScore.ContainsKey(openList[i]) && fScore[openList[i]] < fScore[lowest])
-                {
                     lowest = openList[i];
-                }
             }
             return lowest;
         }
@@ -292,10 +314,7 @@ namespace GameOnCSharp
         }
 
         private bool InBounds(Point point)
-        {
-            return point.X < _width && point.Y < _height
-                && point.X >= 0 && point.Y >= 0;
-        }
+            => point.X < _width && point.Y < _height && point.X >= 0 && point.Y >= 0;
 
         private IEnumerable<Point> FindPointsNearby(Point point, Func<Point, bool> condition)
         {
@@ -319,7 +338,6 @@ namespace GameOnCSharp
                 }
             }
         }
-
     }
 
     public enum MazeCell

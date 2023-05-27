@@ -6,23 +6,17 @@ using System.Linq;
 
 namespace GameOnCSharp
 {
-    public class MenuMode : IGameMode
+    public static class MenuMode
     {
-        private Button _startButton;
-        private List<Button> _screenResolutionButtons = new List<Button>();
+        private static Button _startButton;
+        private static Texture2D _startButtonTexture;
+        private static Texture2D[] _screenResolutionTextures;
+        private static List<Button> _screenResolutionButtons;
 
-        private Texture2D _startButtonTexture;
-        private Texture2D[] _screenResolutionTextures;
+        private const string _srTextureFileLocation = "Sprites/screen resolution/srbutton";
 
-        private string _srTextureFileLocation = "Sprites/screen resolution/srbutton";
-
-        public MenuMode()
+        public static void UpdateLocationAndSize()
         {
-        }
-
-        public void UpdateLocationAndSize()
-        {
-            #region[Screen Resolution Buttons]
             var srButtonsSize = new Point(
                 Game1.Graphics.PreferredBackBufferWidth / 5,
                 Game1.Graphics.PreferredBackBufferHeight / 10);
@@ -41,15 +35,14 @@ namespace GameOnCSharp
 
                 srLocation.Y += srIndent + srButtonsSize.Y;
             }
-            #endregion
 
-            #region[Start Button]
             CreateStartButton();
-            #endregion
         }
 
-        public void LoadContent(ContentManager content)
+        public static void LoadContent(ContentManager content)
         {
+            _screenResolutionButtons = new List<Button>();
+
             _startButtonTexture = content.Load<Texture2D>(@"Sprites/MyPixelButton");
 
             _screenResolutionTextures = new[]
@@ -67,13 +60,13 @@ namespace GameOnCSharp
             _screenResolutionButtons.ForEach(x => x.LoadContent(content));
         }
 
-        public void Update(GameTime gameTime)
+        public static void Update(GameTime gameTime)
         {
             _startButton.Update(gameTime);
             _screenResolutionButtons.ForEach(x => x.Update(gameTime));
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public static void Draw(SpriteBatch spriteBatch)
         {
             Game1.Graphics.GraphicsDevice.Clear(Color.DarkGreen);
 
@@ -81,7 +74,7 @@ namespace GameOnCSharp
             _screenResolutionButtons.ForEach(x => x.Draw(spriteBatch));
         }
 
-        private void CreateStartButton()
+        private static void CreateStartButton()
         {
             var sizeStartButtonRect = new Point(
                     Game1.Graphics.PreferredBackBufferWidth / 3,
@@ -97,7 +90,7 @@ namespace GameOnCSharp
                     _ => Game1.CurrentScene = Scene.Play);
         }
 
-        private void CreateScreenResolutionUpdateButtons()
+        private static void CreateScreenResolutionUpdateButtons()
         {
             var buttonsSize = new Point(
                 Game1.Graphics.PreferredBackBufferWidth / 5,
@@ -107,7 +100,8 @@ namespace GameOnCSharp
 
             var location = new Point(
                 Game1.Graphics.PreferredBackBufferWidth / 20,
-                Game1.Graphics.PreferredBackBufferHeight / 2 - (indent + buttonsSize.Y) * _screenResolutionTextures.Length / 2);
+                Game1.Graphics.PreferredBackBufferHeight / 2 
+                    - (indent + buttonsSize.Y) * ((_screenResolutionTextures.Length + 1)/ 2));
 
             foreach(var srTetureButton in _screenResolutionTextures)
             {
@@ -130,14 +124,12 @@ namespace GameOnCSharp
                         Game1.Graphics.IsFullScreen = true;
                         Game1.Graphics.ApplyChanges();
 
-                        Game1.Scenes.ToList().ForEach(x => x.Value.UpdateLocationAndSize());
+                        UpdateLocationAndSize();
                     }
                     ));
 
                 location.Y += indent + buttonsSize.Y;
             }
         }
-
-        
     }
 }

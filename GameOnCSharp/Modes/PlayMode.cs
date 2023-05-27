@@ -7,71 +7,75 @@ using Microsoft.Xna.Framework.Content;
 
 namespace GameOnCSharp
 {
-    public class PlayMode : IGameMode
+    public static class PlayMode
     {
-        public static bool HaveStartedExecutingCommands { get; set; }
         public static float BlockSize { get; private set; }
 
-        private bool _doFirstAfterPress;
-        private SpriteBatch _spriteBatch;
-        private List<Lazy<IGameObject>> _components;
+        private static bool _start;
+        public static bool HaveStartedExecutingCommands
+        {
+            get => _start;
 
-        // Для TextBox
-        private SpriteFont _font;
-        private Texture2D _buttonSpriteForTextbox;
+            set
+            {
+                if (HaveWin)
+                    throw new ArgumentNullException();
+
+                _start = value;
+            }
+        }
+
+        private static bool _haveWin;
+        public static bool HaveWin
+        {
+            get => _haveWin;
+            set
+            {
+                if (_haveWin)
+                    throw new ArgumentNullException();
+
+                _haveWin = value;
+            }
+        }
 
         private const double ShareSizeInWidth = 0.3;
-        private const int Indent = 30;
+        private const string winText = "You win!";
 
-        public PlayMode(SpriteBatch spriteBatch)
+        private static List<IGameObject> _components;
+        private static bool _doFirstAfterPress;
+        private static SpriteFont _font;
+        private static float Indent;
+
+        private static Vector2 winTextPosition;
+        private static float winTextScale;
+
+
+        static PlayMode()
         {
             _doFirstAfterPress = true;
-            _spriteBatch = spriteBatch;
-            HaveStartedExecutingCommands = false;
-            BlockSize = (int)(Game1.Graphics.PreferredBackBufferHeight / 20);
+            _start = false;
+            _haveWin = false;
+            BlockSize = Game1.Graphics.PreferredBackBufferHeight / 20;
+            Indent = BlockSize;
         }
 
-        public void LoadContent(ContentManager content)
+        public static void LoadContent(ContentManager content)
         {
-            UpdateLocationAndSize();
-
             _font = content.Load<SpriteFont>(@"Fonts/VlaShu");
-            _buttonSpriteForTextbox = content.Load<Texture2D>(@"Sprites/MyPixelButton");
 
-            _components.AsParallel().ForAll(x => x.Value.LoadContent(content));
+            winTextScale = Game1.Graphics.PreferredBackBufferHeight / 3;
 
-        }
+            winTextPosition = new Vector2(
+                Game1.Graphics.PreferredBackBufferWidth / 8 - winTextScale / _font.MeasureString(winText).X,
+                Game1.Graphics.PreferredBackBufferHeight / 3 - winTextScale / _font.MeasureString(winText).Y);
 
-        public void Update(GameTime gameTime)
-        {
-
-            _components.ForEach(x => x.Value.Update(gameTime));
-
-            if (HaveStartedExecutingCommands && _doFirstAfterPress)
-            {
-                Commands.SetCommands((_components[0].Value as TextBox).Text);
-                _doFirstAfterPress = false;
-            }
-
-            if (!HaveStartedExecutingCommands)
-                _doFirstAfterPress = true;
-        }
-
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            Game1.Graphics.GraphicsDevice.Clear(Color.ForestGreen);
-            _components.ForEach(x => x.Value.Draw(_spriteBatch));
-        }
-
-        public void UpdateLocationAndSize()
-        {
             var textboxCollider = new Rectangle(
-                location: new Point(
-                    (int)(Game1.Graphics.PreferredBackBufferWidth * (1 - ShareSizeInWidth)),
-                    (int)Indent),
-                size: new Point(
-                    (int)(Game1.Graphics.PreferredBackBufferWidth * ShareSizeInWidth - 2 * Indent),
-                    (int)(Game1.Graphics.PreferredBackBufferHeight - Indent * 2)));
+                    location: new Point(
+                        (int)(Game1.Graphics.PreferredBackBufferWidth * (1 - ShareSizeInWidth)),
+                        (int)Indent),
+                    size: new Point(
+                        (int)(Game1.Graphics.PreferredBackBufferWidth * ShareSizeInWidth - 2 * Indent),
+                        (int)(Game1.Graphics.PreferredBackBufferHeight - Indent * 2)));
 
             var buttonForTextboxCollider = new Rectangle(
                 location: new Point(
@@ -81,14 +85,51 @@ namespace GameOnCSharp
                     (int)textboxCollider.Width,
                     (int)(Game1.Graphics.PreferredBackBufferHeight * 1.5 / 10)));
 
-            _components = new List<Lazy<IGameObject>>
+            var frame = new Vector2(Indent/2, Indent/2);
+
+            var _buttonSpriteForTextbox = content.Load<Texture2D>(@"Sprites/MyPixelButton");
+
+            _components = new List<IGameObject>
+                {
+                    new TextBox(_font, textboxCollider, frame),
+                    new Button(_buttonSpriteForTextbox,
+                        buttonForTextboxCollider,
+                        _ => HaveStartedExecutingCommands = true)
+                };
+
+            _components.ForEach(x => x.LoadContent(content));
+            Maze.LoadContent(content);
+        }
+
+        public static void Update(GameTime gameTime)
+        {
+            if (HaveStartedExecutingCommands && _doFirstAfterPress)
             {
-                new Lazy<IGameObject>(() => new TextBox(_font, textboxCollider)),
-                new Lazy<IGameObject>(() => new Maze()),
-                new Lazy<IGameObject>(() => new Button(_buttonSpriteForTextbox, 
-                    buttonForTextboxCollider,
-                    i => HaveStartedExecutingCommands = i))
-            };
+                Commands.SetCommands((_components[0] as TextBox).Text.ToString());
+                _doFirstAfterPress = false;
+            }
+            else if(!HaveStartedExecutingCommands)
+            {
+                _doFirstAfterPress = true;
+            }
+
+            Maze.Update(gameTime);
+            _components.ForEach(x => x.Update(gameTime));
+        }
+
+        public static void Draw(SpriteBatch spriteBatch)
+        {
+            Game1.Graphics.GraphicsDevice.Clear(Color.ForestGreen);
+
+            if (HaveWin)
+            {
+                spriteBatch.DrawString(_font, winText, winTextPosition, Color.Black,
+                    0f, Vector2.Zero, winTextScale / _font.MeasureString(winText).Y, SpriteEffects.None, 0f);
+                return;
+            }
+
+            Maze.Draw(spriteBatch);
+            _components.ForEach(x => x.Draw(spriteBatch));
         }
     }
 }
