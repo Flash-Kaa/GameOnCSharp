@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Media;
 
 namespace GameOnCSharp
 {
@@ -43,6 +44,7 @@ namespace GameOnCSharp
 
         private static List<IGameObject> _components;
         private static bool _doFirstAfterPress;
+        private static Song _backgroundMusic;
         private static SpriteFont _font;
         private static float Indent;
 
@@ -55,13 +57,15 @@ namespace GameOnCSharp
             _doFirstAfterPress = true;
             _start = false;
             _haveWin = false;
-            BlockSize = Game1.Graphics.PreferredBackBufferHeight / 20;
-            Indent = BlockSize;
         }
 
         public static void LoadContent(ContentManager content)
         {
+            BlockSize = Game1.Graphics.PreferredBackBufferHeight / 20;
+            Indent = BlockSize;
+
             _font = content.Load<SpriteFont>(@"Fonts/VlaShu");
+            _backgroundMusic = content.Load<Song>(@"Audio/bgMusic");
 
             winTextScale = Game1.Graphics.PreferredBackBufferHeight / 3;
 
@@ -90,12 +94,12 @@ namespace GameOnCSharp
             var _buttonSpriteForTextbox = content.Load<Texture2D>(@"Sprites/MyPixelButton");
 
             _components = new List<IGameObject>
-                {
-                    new TextBox(_font, textboxCollider, frame),
-                    new Button(_buttonSpriteForTextbox,
-                        buttonForTextboxCollider,
-                        _ => HaveStartedExecutingCommands = true)
-                };
+            {
+                new TextBox(_font, textboxCollider, frame),
+                new Button(_buttonSpriteForTextbox,
+                    buttonForTextboxCollider,
+                    _ => HaveStartedExecutingCommands = true)
+            };
 
             _components.ForEach(x => x.LoadContent(content));
             Maze.LoadContent(content);
@@ -103,6 +107,11 @@ namespace GameOnCSharp
 
         public static void Update(GameTime gameTime)
         {
+            if (MediaPlayer.State == MediaState.Stopped)
+            {
+                MediaPlayer.Play(_backgroundMusic);
+            }
+
             if (HaveStartedExecutingCommands && _doFirstAfterPress)
             {
                 Commands.SetCommands((_components[0] as TextBox).Text.ToString());

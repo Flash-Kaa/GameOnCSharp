@@ -3,20 +3,19 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace GameOnCSharp
 {
     public class Game1 : Game
     {
-        public static GraphicsDeviceManager Graphics { get; private set; }
+        public static GraphicsDeviceManager Graphics { get; protected set; }
         public static Scene CurrentScene { get; set; }
 
         private Dictionary<Scene, Type> _sceneClasses;
         private SpriteBatch _spriteBatch;
         private Scene _previous;
 
-        public Game1()
+        public Game1() : base()
         {
             Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";

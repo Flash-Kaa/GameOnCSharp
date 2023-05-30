@@ -12,10 +12,8 @@ namespace GameOnCSharp
     {
         public static Target End { get; private set; }
         public static Vector2 Start { get; private set; }
-        public static Trap[] Traps { get; private set; }
 
         private static Vector2 _size;
-        private static List<Wall> _walls;
         private static List<IGameObject> _components;
 
         private const double ShareInWidth = 0.55;
@@ -68,10 +66,9 @@ namespace GameOnCSharp
         
         public static void Draw(SpriteBatch spriteBatch)
         {
-            _components.ForEach(t => t.Draw(spriteBatch));
-
             End.Draw(spriteBatch);
             PlayerAnimal.Draw(spriteBatch);
+            _components.ForEach(t => t.Draw(spriteBatch));
         }
 
         public static bool CanLocatedHere(Point position)
