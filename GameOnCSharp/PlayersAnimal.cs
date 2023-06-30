@@ -31,9 +31,6 @@ namespace GameOnCSharp
             get => _position;
             set
             {
-                if(!Maze.CanLocatedHere(value.ToPoint()))
-                    throw new IndexOutOfRangeException();
-
                 _position = value;
             }
         }
